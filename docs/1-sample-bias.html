@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이터 표본 편향 평가 (PSI) | AI 평가·검증 Lab</title>
+  <style>
+    :root {
+      --primary: #667eea; --secondary: #764ba2;
+      --accent: #ef6c00; --bg: #f7f8fc; --card: #ffffff;
+      --text: #2d3748; --muted: #718096; --border: #e2e8f0;
+      --code-bg: #1e2130; --pass: #2e7d32; --fail: #c62828;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+    nav { background: rgba(255,255,255,.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+    .nav-logo { font-size: 1rem; font-weight: 700; background: linear-gradient(135deg,var(--primary),var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }
+    .breadcrumb { font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .breadcrumb a { color: var(--primary); text-decoration: none; }
+
+    .hero { background: linear-gradient(135deg, #ef6c00 0%, #f57c00 60%, #ff8f00 100%); color: white; padding: 60px 24px 50px; }
+    .hero-inner { max-width: 900px; margin: 0 auto; }
+    .hero-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .chip { background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4); border-radius: 20px; padding: 4px 14px; font-size: 0.8rem; font-weight: 600; }
+    .hero h1 { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 800; margin-bottom: 12px; }
+    .hero p { opacity: .9; font-size: 1.05rem; max-width: 640px; }
+
+    article { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    h2 { font-size: 1.45rem; font-weight: 700; margin: 48px 0 16px; color: var(--text); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+    h3 { font-size: 1.15rem; font-weight: 700; margin: 28px 0 12px; color: var(--text); }
+    p { margin-bottom: 14px; color: var(--text); font-size: 0.97rem; }
+
+    .info-box { background: #fff8f0; border-left: 4px solid var(--accent); border-radius: 8px; padding: 18px 22px; margin: 20px 0; }
+    .info-box h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--accent); }
+    .info-box p { margin: 0; font-size: 0.9rem; color: var(--text); }
+
+    .formula-box { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; margin: 20px 0; text-align: center; }
+    .formula { font-size: 1.1rem; font-family: 'Georgia', serif; letter-spacing: .5px; color: var(--text); line-height: 2; }
+    .formula-caption { font-size: 0.85rem; color: var(--muted); margin-top: 10px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 16px 0; }
+    th { background: var(--bg); padding: 11px 14px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); }
+    tr:hover td { background: #fafafe; }
+    .pass { color: var(--pass); font-weight: 700; }
+    .fail { color: var(--fail); font-weight: 700; }
+    .warn { color: #e65100; font-weight: 700; }
+
+    pre { background: var(--code-bg); color: #abb2bf; padding: 20px 24px; border-radius: 10px; overflow-x: auto; font-size: 0.87rem; line-height: 1.7; font-family: 'Fira Code','Consolas',monospace; margin: 16px 0; }
+    .kw { color: #c678dd; } .fn { color: #61afef; } .str { color: #98c379; } .cm { color: #5c6370; font-style: italic; } .num { color: #d19a66; }
+
+    .step-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 14px; margin: 18px 0; }
+    .step-box { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .step-box .num { width: 28px; height: 28px; background: linear-gradient(135deg,#ef6c00,#f57c00); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 10px; }
+    .step-box h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+    .step-box p { font-size: 0.83rem; color: var(--muted); margin: 0; }
+
+    .result-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 18px 0; }
+    .result-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 18px; text-align: center; }
+    .result-card .label { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    .result-card .value { font-size: 1.6rem; font-weight: 800; }
+    .result-card .status { font-size: 0.82rem; margin-top: 6px; font-weight: 600; }
+    .v-good { color: #2e7d32; }
+    .v-ok { color: #1565c0; }
+    .v-bad { color: #c62828; }
+
+    .tip-box { background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 10px; padding: 18px 22px; margin: 20px 0; }
+    .tip-box h4 { font-size: 0.95rem; font-weight: 700; color: #1565c0; margin-bottom: 8px; }
+    .tip-box ul { padding-left: 18px; }
+    .tip-box li { font-size: 0.9rem; color: var(--text); margin-bottom: 5px; }
+
+    .nav-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: all .2s; }
+    .btn-primary { background: linear-gradient(135deg,var(--primary),var(--secondary)); color: white; }
+    .btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-outline { border: 2px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    @media(max-width:640px) { .result-grid { grid-template-columns: 1fr 1fr; } article { padding: 32px 16px 60px; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">🔬 AI 평가·검증 Lab</a>
+    <div class="breadcrumb">
+      <a href="../index.html">홈</a> › <span>Notebook 01</span>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-meta">
+      <span class="chip">Notebook 01</span>
+      <span class="chip">비생성형 AI · ML</span>
+      <span class="chip">데이터 공정성</span>
+    </div>
+    <h1>📊 데이터 표본 편향 평가</h1>
+    <p>PSI(Population Stability Index)로 학습·검증·시험 데이터가 원천데이터를 얼마나 잘 대표하는지 측정합니다.</p>
+  </div>
+</div>
+
+<article>
+
+  <!-- 개요 -->
+  <h2>1. 개요</h2>
+  <div class="info-box">
+    <h4>적용 근거</h4>
+    <p>금융위원회 「금융분야 AI 개발·활용 안내서」 (나-1-1): 데이터 대표성·정합성 점검 / (나-1-2): 편향성 점검</p>
+  </div>
+
+  <div class="step-grid">
+    <div class="step-box">
+      <div class="num">대</div>
+      <h4>대분류</h4>
+      <p>데이터 공정성</p>
+    </div>
+    <div class="step-box">
+      <div class="num">항</div>
+      <h4>평가 항목</h4>
+      <p>표본 편향 (Sample Bias)</p>
+    </div>
+    <div class="step-box">
+      <div class="num">대</div>
+      <h4>평가 대상</h4>
+      <p>학습·검증·1차/2차 시험 데이터</p>
+    </div>
+    <div class="step-box">
+      <div class="num">지</div>
+      <h4>평가 지표</h4>
+      <p>PSI (Population Stability Index)</p>
+    </div>
+  </div>
+
+  <!-- 데이터셋 -->
+  <h2>2. 데이터셋: UCI Adult Income</h2>
+  <p>1994년 미국 인구조사 데이터를 기반으로 연소득 >50K 여부를 예측하는 데이터셋입니다.</p>
+  <table>
+    <thead><tr><th>항목</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>출처</td><td>UCI Machine Learning Repository</td></tr>
+      <tr><td>샘플 수</td><td>48,842개 (결측치 제거 후 약 45,222개)</td></tr>
+      <tr><td>특성 수</td><td>14개 (age, workclass, education, sex, race 등)</td></tr>
+      <tr><td>타깃</td><td>소득 &gt;50K / ≤50K</td></tr>
+      <tr><td>보호변수</td><td>성별(sex), 학력(education), 인종(race)</td></tr>
+    </tbody>
+  </table>
+
+  <pre><code><span class="cm"># 데이터 분할: 학습 70% / 테스트 30%</span>
+train_data, test_data = train_test_split(
+    df, test_size=0.3, random_state=42, stratify=df[<span class="str">'income'</span>]
+)</code></pre>
+
+  <!-- PSI 공식 -->
+  <h2>3. PSI (Population Stability Index)</h2>
+  <div class="formula-box">
+    <div class="formula">PSI = Σ (P<sub>i</sub> − A<sub>i</sub>) × ln(P<sub>i</sub> / A<sub>i</sub>)</div>
+    <div class="formula-caption">
+      P<sub>i</sub>: 원천데이터의 i번째 그룹 비율 &nbsp;·&nbsp;
+      A<sub>i</sub>: 학습데이터의 i번째 그룹 비율 &nbsp;·&nbsp;
+      n: 총 그룹 수
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>PSI 범위</th><th>해석</th><th>판정</th></tr></thead>
+    <tbody>
+      <tr><td>PSI &lt; 0.10</td><td>분포 변화 없음</td><td><span class="pass">✅ 우수</span></td></tr>
+      <tr><td>0.10 ≤ PSI &lt; 0.25</td><td>소폭 변화</td><td><span class="warn">⚠️ 통과 (주의)</span></td></tr>
+      <tr><td>PSI ≥ 0.25</td><td>큰 변화 → 편향 존재</td><td><span class="fail">❌ 실패</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>구현 코드</h3>
+  <pre><code><span class="kw">def</span> <span class="fn">calculate_psi</span>(population_dist, sample_dist):
+    <span class="cm">"""PSI 계산 함수"""</span>
+    pop_prop = population_dist / population_dist.sum()
+    sample_prop = sample_dist / sample_dist.sum()
+
+    all_groups = <span class="fn">set</span>(pop_prop.index) | <span class="fn">set</span>(sample_prop.index)
+    psi = <span class="num">0</span>
+
+    <span class="kw">for</span> group <span class="kw">in</span> all_groups:
+        pop_p = pop_prop.get(group, <span class="num">0.0001</span>)   <span class="cm"># 0 방지</span>
+        smp_p = sample_prop.get(group, <span class="num">0.0001</span>)
+        psi += (pop_p - smp_p) * np.log(pop_p / smp_p)
+
+    <span class="kw">return</span> psi</code></pre>
+
+  <!-- 보호변수 -->
+  <h2>4. 보호변수 설정</h2>
+  <p>금융소비자보호법 기준에 따라 다음 3개 보호변수를 평가 대상으로 설정합니다.</p>
+  <table>
+    <thead><tr><th>보호변수</th><th>그룹</th><th>비고</th></tr></thead>
+    <tbody>
+      <tr><td>성별 (sex)</td><td>남자, 여자</td><td>Male → 남자, Female → 여자</td></tr>
+      <tr><td>학력 (education)</td><td>중졸 이하, 고졸, 초대졸, 대졸 이상</td><td>16개 범주 → 4그룹 매핑</td></tr>
+      <tr><td>인종 (race)</td><td>White, Black, Asian-Pac-Islander, 기타</td><td>원본 5개 범주 유지</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 예상 결과 -->
+  <h2>5. 예상 평가 결과</h2>
+  <p>Stratified Sampling으로 분할된 데이터는 일반적으로 모두 PSI &lt; 0.01로 우수한 결과를 보입니다.</p>
+
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="label">성별 PSI</div>
+      <div class="value v-good">~0.000</div>
+      <div class="status pass">✅ 우수</div>
+    </div>
+    <div class="result-card">
+      <div class="label">학력 PSI</div>
+      <div class="value v-good">~0.000</div>
+      <div class="status pass">✅ 우수</div>
+    </div>
+    <div class="result-card">
+      <div class="label">인종 PSI</div>
+      <div class="value v-good">~0.000</div>
+      <div class="status pass">✅ 우수</div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <h4>결과 해석</h4>
+    <p><code>stratify=df['income']</code> 옵션으로 계층 분할을 적용했기 때문에 PSI가 극도로 낮게 나타납니다.
+    실제 현업에서는 편의 샘플링(Convenience Sampling)이나 특정 기간 집중 수집 등으로 PSI가 높아질 수 있습니다.</p>
+  </div>
+
+  <!-- 개선 방향 -->
+  <h2>6. 편향 시 개선 방향</h2>
+  <div class="tip-box">
+    <h4>PSI ≥ 0.25 발생 시 조치</h4>
+    <ul>
+      <li><strong>재샘플링</strong>: Stratified Sampling으로 보호변수 비율 유지</li>
+      <li><strong>가중치 조정</strong>: 과소/과대 표현된 그룹에 샘플 가중치 부여</li>
+      <li><strong>데이터 수집</strong>: 부족한 그룹의 데이터를 추가로 수집</li>
+      <li><strong>오버샘플링</strong>: SMOTE 등으로 소수 그룹 합성 데이터 생성</li>
+    </ul>
+  </div>
+
+  <pre><code><span class="cm"># 편향 완화: 계층 분할 적용</span>
+train_data, test_data = train_test_split(
+    df,
+    test_size=<span class="num">0.3</span>,
+    random_state=<span class="num">42</span>,
+    stratify=df[[<span class="str">'income'</span>, <span class="str">'sex_kr'</span>, <span class="str">'education_group'</span>]]  <span class="cm"># 다중 계층</span>
+)</code></pre>
+
+  <!-- 적용 사례 -->
+  <h2>7. 적용 사례</h2>
+  <table>
+    <thead><tr><th>도메인</th><th>적용 시나리오</th></tr></thead>
+    <tbody>
+      <tr><td>금융</td><td>대출 심사 모델의 학습 데이터 대표성 검증</td></tr>
+      <tr><td>채용</td><td>AI 이력서 스크리닝 시스템의 인구통계학적 편향 점검</td></tr>
+      <tr><td>의료</td><td>질병 예측 모델의 연령·성별 분포 검증</td></tr>
+    </tbody>
+  </table>
+
+  <div class="nav-bottom">
+    <a class="btn btn-outline" href="../index.html">← 홈으로</a>
+    <a class="btn btn-primary" href="2-labeling-bias.html">Notebook 02: 라벨링 편향 →</a>
+  </div>
+
+</article>
+</body>
+</html>

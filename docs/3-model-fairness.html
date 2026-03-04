@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모델 공정성 평가 (FPR/TPR/FDR) | AI 평가·검증 Lab</title>
+  <style>
+    :root {
+      --primary: #667eea; --secondary: #764ba2;
+      --accent: #6a1b9a; --bg: #f7f8fc; --card: #ffffff;
+      --text: #2d3748; --muted: #718096; --border: #e2e8f0;
+      --code-bg: #1e2130; --pass: #2e7d32; --fail: #c62828;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+    nav { background: rgba(255,255,255,.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+    .nav-logo { font-size: 1rem; font-weight: 700; background: linear-gradient(135deg,var(--primary),var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }
+    .breadcrumb { font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .breadcrumb a { color: var(--primary); text-decoration: none; }
+
+    .hero { background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 60%, #9c27b0 100%); color: white; padding: 60px 24px 50px; }
+    .hero-inner { max-width: 900px; margin: 0 auto; }
+    .hero-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .chip { background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4); border-radius: 20px; padding: 4px 14px; font-size: 0.8rem; font-weight: 600; }
+    .hero h1 { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 800; margin-bottom: 12px; }
+    .hero p { opacity: .9; font-size: 1.05rem; max-width: 640px; }
+
+    article { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    h2 { font-size: 1.45rem; font-weight: 700; margin: 48px 0 16px; color: var(--text); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+    h3 { font-size: 1.15rem; font-weight: 700; margin: 28px 0 12px; color: var(--text); }
+    p { margin-bottom: 14px; color: var(--text); font-size: 0.97rem; }
+
+    .info-box { background: #f3e5f5; border-left: 4px solid var(--accent); border-radius: 8px; padding: 18px 22px; margin: 20px 0; }
+    .info-box h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--accent); }
+    .info-box p { margin: 0; font-size: 0.9rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 16px 0; }
+    th { background: var(--bg); padding: 11px 14px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); }
+    tr:hover td { background: #fafafe; }
+    .pass { color: var(--pass); font-weight: 700; }
+    .fail { color: var(--fail); font-weight: 700; }
+
+    pre { background: var(--code-bg); color: #abb2bf; padding: 20px 24px; border-radius: 10px; overflow-x: auto; font-size: 0.87rem; line-height: 1.7; font-family: 'Fira Code','Consolas',monospace; margin: 16px 0; }
+    .kw { color: #c678dd; } .fn { color: #61afef; } .str { color: #98c379; } .cm { color: #5c6370; font-style: italic; } .num { color: #d19a66; }
+
+    .metric-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin: 20px 0; }
+    .metric-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .metric-card .icon { font-size: 1.6rem; margin-bottom: 10px; }
+    .metric-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .metric-card .formula { font-size: 0.85rem; background: var(--bg); padding: 6px 10px; border-radius: 6px; font-family: monospace; margin-bottom: 8px; }
+    .metric-card p { font-size: 0.85rem; color: var(--muted); margin: 0; }
+    .metric-card .threshold { font-size: 0.8rem; font-weight: 700; margin-top: 8px; color: var(--accent); }
+
+    .cm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+    .cm-box { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .cm-box h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 12px; text-align: center; }
+    .cm-table { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; text-align: center; font-size: 0.82rem; }
+    .cm-cell { padding: 8px 4px; border-radius: 4px; }
+    .cm-header { background: var(--bg); font-weight: 700; color: var(--muted); }
+    .cm-tp { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
+    .cm-tn { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
+    .cm-fp { background: #ffebee; color: #c62828; font-weight: 700; }
+    .cm-fn { background: #fff3e0; color: #e65100; font-weight: 700; }
+
+    .tip-box { background: #f8fff8; border: 1px solid #c8e6c9; border-radius: 10px; padding: 18px 22px; margin: 20px 0; }
+    .tip-box h4 { font-size: 0.95rem; font-weight: 700; color: var(--pass); margin-bottom: 8px; }
+    .tip-box ul { padding-left: 18px; }
+    .tip-box li { font-size: 0.9rem; color: var(--text); margin-bottom: 5px; }
+
+    .tradeoff-box { background: #fffde7; border: 1px solid #fff176; border-radius: 10px; padding: 18px 22px; margin: 20px 0; }
+    .tradeoff-box h4 { color: #f57f17; font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .tradeoff-box p { font-size: 0.9rem; margin: 0; color: var(--text); }
+
+    .nav-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: all .2s; }
+    .btn-primary { background: linear-gradient(135deg,var(--primary),var(--secondary)); color: white; }
+    .btn-primary:hover { opacity: .9; }
+    .btn-outline { border: 2px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    @media(max-width:640px) { .metric-cards,.cm-grid { grid-template-columns: 1fr; } article { padding: 32px 16px 60px; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">🔬 AI 평가·검증 Lab</a>
+    <div class="breadcrumb">
+      <a href="../index.html">홈</a> › <span>Notebook 03</span>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-meta">
+      <span class="chip">Notebook 03</span>
+      <span class="chip">비생성형 AI · ML</span>
+      <span class="chip">모델 공정성</span>
+    </div>
+    <h1>🎯 모델 공정성 평가</h1>
+    <p>FPR·FDR·TPR Parity로 Random Forest 분류기의 예측이 성별 그룹에 공정한지 측정하고, 임계값 조정으로 공정성을 개선합니다.</p>
+  </div>
+</div>
+
+<article>
+
+  <h2>1. 공정성 평가 지표</h2>
+  <p>모델 공정성은 보호변수 그룹 간 예측 성능의 차이를 측정합니다. 세 가지 핵심 지표를 사용합니다.</p>
+
+  <div class="metric-cards">
+    <div class="metric-card">
+      <div class="icon">🚨</div>
+      <h4>FPR Parity<br><small>False Positive Rate</small></h4>
+      <div class="formula">FP / (FP + TN)</div>
+      <p>실제 음성 중 모델이 잘못 양성으로 예측한 비율. "억울한 피해"가 특정 그룹에 집중되지 않아야 합니다.</p>
+      <div class="threshold">기준: 그룹 간 Gap &lt; 0.10</div>
+    </div>
+    <div class="metric-card">
+      <div class="icon">✅</div>
+      <h4>TPR Parity<br><small>True Positive Rate (Recall)</small></h4>
+      <div class="formula">TP / (TP + FN)</div>
+      <p>실제 양성 중 모델이 올바르게 양성으로 예측한 비율. "기회(혜택)"가 모든 그룹에 공평하게 제공되어야 합니다.</p>
+      <div class="threshold">기준: 그룹 간 Gap &lt; 0.10</div>
+    </div>
+    <div class="metric-card">
+      <div class="icon">🎯</div>
+      <h4>FDR Parity<br><small>False Discovery Rate</small></h4>
+      <div class="formula">FP / (FP + TP)</div>
+      <p>양성으로 예측한 샘플 중 실제로는 음성인 비율. 예측 신뢰도가 그룹 간 균등해야 합니다.</p>
+      <div class="threshold">기준: 그룹 간 Gap &lt; 0.10</div>
+    </div>
+  </div>
+
+  <h2>2. 구현 과정</h2>
+
+  <h3>2.1 모델 학습</h3>
+  <pre><code><span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> RandomForestClassifier
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+
+<span class="cm"># 수치형 특성만 사용</span>
+feature_cols = [<span class="str">'age'</span>, <span class="str">'education-num'</span>, <span class="str">'hours-per-week'</span>,
+                <span class="str">'capital-gain'</span>, <span class="str">'capital-loss'</span>]
+
+scaler = <span class="fn">StandardScaler</span>()
+X_train_scaled = scaler.<span class="fn">fit_transform</span>(X_train)
+X_test_scaled  = scaler.<span class="fn">transform</span>(X_test)
+
+model = <span class="fn">RandomForestClassifier</span>(
+    n_estimators=<span class="num">100</span>, max_depth=<span class="num">10</span>, random_state=<span class="num">42</span>
+)
+model.<span class="fn">fit</span>(X_train_scaled, y_train)</code></pre>
+
+  <h3>2.2 Fairlearn으로 그룹별 지표 계산</h3>
+  <pre><code><span class="kw">from</span> fairlearn.metrics <span class="kw">import</span> MetricFrame, false_positive_rate
+<span class="kw">from</span> fairlearn.metrics <span class="kw">import</span> true_positive_rate, false_discovery_rate
+
+metric_frame = <span class="fn">MetricFrame</span>(
+    metrics={
+        <span class="str">'accuracy'</span>: accuracy_score,
+        <span class="str">'fpr'</span>: false_positive_rate,
+        <span class="str">'tpr'</span>: true_positive_rate,
+        <span class="str">'fdr'</span>: false_discovery_rate,
+    },
+    y_true=y_test,
+    y_pred=y_pred_test,
+    sensitive_features=sensitive_test   <span class="cm"># 성별</span>
+)
+
+<span class="fn">print</span>(metric_frame.by_group)   <span class="cm"># Male / Female 별 값</span></code></pre>
+
+  <h2>3. Confusion Matrix 해석</h2>
+  <p>공정성 평가의 핵심은 그룹별 Confusion Matrix를 비교하는 것입니다.</p>
+
+  <div class="cm-grid">
+    <div class="cm-box">
+      <h4>Male 그룹</h4>
+      <div class="cm-table">
+        <div class="cm-cell cm-header"></div>
+        <div class="cm-cell cm-header">Pred +</div>
+        <div class="cm-cell cm-header">Pred −</div>
+        <div class="cm-cell cm-header">Real +</div>
+        <div class="cm-cell cm-tp">TP</div>
+        <div class="cm-cell cm-fn">FN</div>
+        <div class="cm-cell cm-header">Real −</div>
+        <div class="cm-cell cm-fp">FP</div>
+        <div class="cm-cell cm-tn">TN</div>
+      </div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-top:10px;text-align:center;">FPR = FP / (FP+TN)</p>
+    </div>
+    <div class="cm-box">
+      <h4>Female 그룹</h4>
+      <div class="cm-table">
+        <div class="cm-cell cm-header"></div>
+        <div class="cm-cell cm-header">Pred +</div>
+        <div class="cm-cell cm-header">Pred −</div>
+        <div class="cm-cell cm-header">Real +</div>
+        <div class="cm-cell cm-tp">TP</div>
+        <div class="cm-cell cm-fn">FN</div>
+        <div class="cm-cell cm-header">Real −</div>
+        <div class="cm-cell cm-fp">FP</div>
+        <div class="cm-cell cm-tn">TN</div>
+      </div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-top:10px;text-align:center;">FPR = FP / (FP+TN)</p>
+    </div>
+  </div>
+
+  <h2>4. 예상 결과 및 해석</h2>
+
+  <table>
+    <thead><tr><th>지표</th><th>Male</th><th>Female</th><th>Gap</th><th>판정</th></tr></thead>
+    <tbody>
+      <tr><td>FPR</td><td>~0.073</td><td>~0.019</td><td>~0.054</td><td><span class="pass">✅ Gap &lt; 0.10</span></td></tr>
+      <tr><td>TPR (Recall)</td><td>~0.721</td><td>~0.568</td><td>~0.153</td><td><span class="fail">❌ Gap ≥ 0.10</span></td></tr>
+      <tr><td>FDR</td><td>~0.200</td><td>~0.250</td><td>~0.050</td><td><span class="pass">✅ Gap &lt; 0.10</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <h4>TPR Gap 해석</h4>
+    <p>고소득(>50K)인 여성이 남성에 비해 더 자주 "저소득"으로 잘못 예측됩니다. 이는 학습 데이터에서 고소득 여성 샘플이 부족하여 모델이 여성의 고소득 패턴을 충분히 학습하지 못했기 때문입니다.</p>
+  </div>
+
+  <h2>5. 임계값 조정으로 공정성 개선</h2>
+  <pre><code><span class="cm"># 다양한 임계값에서 공정성 변화 측정</span>
+y_pred_proba = model.<span class="fn">predict_proba</span>(X_test_scaled)[:, <span class="num">1</span>]
+
+thresholds = np.<span class="fn">linspace</span>(<span class="num">0.1</span>, <span class="num">0.9</span>, <span class="num">9</span>)
+results = []
+
+<span class="kw">for</span> thresh <span class="kw">in</span> thresholds:
+    y_pred = (y_pred_proba >= thresh).astype(<span class="fn">int</span>)
+    mf = <span class="fn">MetricFrame</span>(
+        metrics={<span class="str">'fpr'</span>: false_positive_rate, <span class="str">'tpr'</span>: true_positive_rate},
+        y_true=y_test, y_pred=y_pred, sensitive_features=sensitive_test
+    )
+    results.<span class="fn">append</span>({
+        <span class="str">'threshold'</span>: thresh,
+        <span class="str">'fpr_gap'</span>: <span class="fn">abs</span>(mf.by_group.loc[<span class="str">'Male'</span>,<span class="str">'fpr'</span>] - mf.by_group.loc[<span class="str">'Female'</span>,<span class="str">'fpr'</span>]),
+        <span class="str">'tpr_gap'</span>: <span class="fn">abs</span>(mf.by_group.loc[<span class="str">'Male'</span>,<span class="str">'tpr'</span>] - mf.by_group.loc[<span class="str">'Female'</span>,<span class="str">'tpr'</span>])
+    })</code></pre>
+
+  <h2>6. 공정성 개선 전략</h2>
+
+  <div class="tip-box">
+    <h4>알고리즘 레벨</h4>
+    <ul>
+      <li><strong>Fairness Constraints</strong>: 학습 시 공정성 제약 조건 추가</li>
+      <li><strong>Adversarial Debiasing</strong>: 보호변수를 예측하지 못하도록 적대적 학습</li>
+      <li><strong>가중치 조정</strong>: 그룹별 손실 함수 가중치 변경</li>
+    </ul>
+  </div>
+
+  <div class="tip-box">
+    <h4>후처리 레벨 (ThresholdOptimizer)</h4>
+    <ul>
+      <li>그룹별로 다른 분류 임계값을 적용하여 FPR·TPR Gap 최소화</li>
+    </ul>
+  </div>
+
+  <pre><code><span class="kw">from</span> fairlearn.postprocessing <span class="kw">import</span> ThresholdOptimizer
+
+postprocessor = <span class="fn">ThresholdOptimizer</span>(
+    estimator=model,
+    constraints=<span class="str">"equalized_odds"</span>
+)
+postprocessor.<span class="fn">fit</span>(X_train, y_train, sensitive_features=sensitive_train)
+y_pred_fair = postprocessor.<span class="fn">predict</span>(X_test, sensitive_features=sensitive_test)</code></pre>
+
+  <div class="tradeoff-box">
+    <h4>⚡ 공정성 vs 정확도 트레이드오프</h4>
+    <p>공정성 제약을 강하게 적용할수록 전체 모델 정확도가 약간 감소할 수 있습니다. <strong>FPR Parity ↔ TPR Parity 동시 만족은 수학적으로 불가능</strong>(불가능성 정리)한 경우가 있으므로, 도메인별로 중요한 지표를 선택해야 합니다.</p>
+  </div>
+
+  <h2>7. 도메인별 중요 지표</h2>
+  <table>
+    <thead><tr><th>도메인</th><th>중요 지표</th><th>이유</th></tr></thead>
+    <tbody>
+      <tr><td>대출 심사</td><td>FPR Parity</td><td>억울한 대출 거절이 특정 그룹에 집중되면 안 됨</td></tr>
+      <tr><td>채용 선발</td><td>TPR Parity</td><td>자격 있는 사람에게 기회가 균등하게 제공되어야 함</td></tr>
+      <tr><td>의료 진단</td><td>TPR Parity</td><td>질환 탐지 기회가 그룹과 무관해야 함</td></tr>
+      <tr><td>재범 예측</td><td>FPR Parity</td><td>무고한 사람이 위험으로 분류되는 비율이 공평해야 함</td></tr>
+    </tbody>
+  </table>
+
+  <div class="nav-bottom">
+    <a class="btn btn-outline" href="2-labeling-bias.html">← Notebook 02: 라벨링 편향</a>
+    <a class="btn btn-primary" href="4-llm-representativeness.html">Notebook 04: LLM 대표성 →</a>
+  </div>
+
+</article>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM 데이터 대표성 편향 평가 (Entropy) | AI 평가·검증 Lab</title>
+  <style>
+    :root {
+      --primary: #667eea; --secondary: #764ba2;
+      --accent: #2e7d32; --bg: #f7f8fc; --card: #ffffff;
+      --text: #2d3748; --muted: #718096; --border: #e2e8f0;
+      --code-bg: #1e2130; --pass: #2e7d32; --fail: #c62828;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+    nav { background: rgba(255,255,255,.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+    .nav-logo { font-size: 1rem; font-weight: 700; background: linear-gradient(135deg,var(--primary),var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }
+    .breadcrumb { font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .breadcrumb a { color: var(--primary); text-decoration: none; }
+
+    .hero { background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 60%, #43a047 100%); color: white; padding: 60px 24px 50px; }
+    .hero-inner { max-width: 900px; margin: 0 auto; }
+    .hero-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .chip { background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4); border-radius: 20px; padding: 4px 14px; font-size: 0.8rem; font-weight: 600; }
+    .hero h1 { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 800; margin-bottom: 12px; }
+    .hero p { opacity: .9; font-size: 1.05rem; max-width: 640px; }
+
+    article { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    h2 { font-size: 1.45rem; font-weight: 700; margin: 48px 0 16px; color: var(--text); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+    h3 { font-size: 1.15rem; font-weight: 700; margin: 28px 0 12px; color: var(--text); }
+    p { margin-bottom: 14px; color: var(--text); font-size: 0.97rem; }
+
+    .info-box { background: #e8f5e9; border-left: 4px solid var(--accent); border-radius: 8px; padding: 18px 22px; margin: 20px 0; }
+    .info-box h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--accent); }
+    .info-box p { margin: 0; font-size: 0.9rem; }
+
+    .formula-box { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin: 20px 0; text-align: center; }
+    .formula { font-size: 1.15rem; font-family: 'Georgia', serif; color: var(--text); line-height: 2; }
+    .formula-caption { font-size: 0.85rem; color: var(--muted); margin-top: 10px; line-height: 1.8; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 16px 0; }
+    th { background: var(--bg); padding: 11px 14px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); }
+    tr:hover td { background: #fafafe; }
+    .pass { color: var(--pass); font-weight: 700; }
+    .fail { color: var(--fail); font-weight: 700; }
+    .warn { color: #e65100; font-weight: 700; }
+
+    pre { background: var(--code-bg); color: #abb2bf; padding: 20px 24px; border-radius: 10px; overflow-x: auto; font-size: 0.87rem; line-height: 1.7; font-family: 'Fira Code','Consolas',monospace; margin: 16px 0; }
+    .kw { color: #c678dd; } .fn { color: #61afef; } .str { color: #98c379; } .cm { color: #5c6370; font-style: italic; } .num { color: #d19a66; }
+
+    .entropy-vis { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 20px 0; }
+    .ent-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 18px; text-align: center; }
+    .ent-card .label { font-size: 0.8rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .ent-bar-track { background: var(--bg); border-radius: 6px; height: 14px; margin: 8px 0; }
+    .ent-bar { height: 14px; border-radius: 6px; }
+    .ent-value { font-size: 1.3rem; font-weight: 800; }
+    .ent-status { font-size: 0.82rem; font-weight: 600; margin-top: 4px; }
+
+    .level-table { background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 20px 0; }
+    .level-row { display: flex; align-items: center; gap: 0; border-bottom: 1px solid var(--border); }
+    .level-row:last-child { border-bottom: none; }
+    .level-color { width: 8px; min-height: 52px; }
+    .level-content { flex: 1; padding: 14px 18px; }
+    .level-content h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
+    .level-content p { font-size: 0.83rem; color: var(--muted); margin: 0; }
+    .level-range { padding: 14px 18px; font-size: 0.88rem; font-weight: 700; text-align: right; min-width: 140px; }
+
+    .tip-box { background: #f8fff8; border: 1px solid #c8e6c9; border-radius: 10px; padding: 18px 22px; margin: 20px 0; }
+    .tip-box h4 { font-size: 0.95rem; font-weight: 700; color: var(--pass); margin-bottom: 8px; }
+    .tip-box ul { padding-left: 18px; }
+    .tip-box li { font-size: 0.9rem; color: var(--text); margin-bottom: 5px; }
+
+    .nav-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: all .2s; }
+    .btn-primary { background: linear-gradient(135deg,var(--primary),var(--secondary)); color: white; }
+    .btn-primary:hover { opacity: .9; }
+    .btn-outline { border: 2px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    @media(max-width:640px) { .entropy-vis { grid-template-columns: 1fr 1fr; } article { padding: 32px 16px 60px; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">🔬 AI 평가·검증 Lab</a>
+    <div class="breadcrumb">
+      <a href="../index.html">홈</a> › <span>Notebook 04</span>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-meta">
+      <span class="chip">Notebook 04</span>
+      <span class="chip">생성형 AI · LLM</span>
+      <span class="chip">데이터 공정성</span>
+    </div>
+    <h1>🌐 데이터 대표성 편향 평가</h1>
+    <p>Shannon Entropy로 LLM 학습 데이터의 성별·직업 언급 분포가 얼마나 균형 잡혀 있는지 측정합니다.</p>
+  </div>
+</div>
+
+<article>
+
+  <h2>1. Shannon Entropy란?</h2>
+  <p>정보 이론에서 <strong>엔트로피(Entropy)</strong>는 확률 분포의 불확실성·다양성을 측정하는 지표입니다. 데이터 대표성 평가에서 높은 엔트로피는 균형 잡힌 분포를, 낮은 엔트로피는 특정 그룹의 과대표현을 의미합니다.</p>
+
+  <div class="formula-box">
+    <div class="formula">H(X) = −Σ p(x) × log₂ p(x)</div>
+    <div class="formula-caption">
+      p(x): 각 카테고리의 출현 확률 &nbsp;·&nbsp; H(X): 엔트로피 (bits)<br>
+      <strong>정규화 엔트로피</strong> = H(X) / log₂(n) &nbsp;(0~1 범위, 1 = 완전 균등)
+    </div>
+  </div>
+
+  <div class="level-table">
+    <div class="level-row">
+      <div class="level-color" style="background:#2e7d32;"></div>
+      <div class="level-content"><h4>Excellent</h4><p>매우 균등하고 다양한 분포 → 편향 없음</p></div>
+      <div class="level-range" style="color:#2e7d32;">정규화 엔트로피 &gt; 0.9</div>
+    </div>
+    <div class="level-row">
+      <div class="level-color" style="background:#1565c0;"></div>
+      <div class="level-content"><h4>Good</h4><p>적절한 다양성 → 경미한 편향</p></div>
+      <div class="level-range" style="color:#1565c0;">0.7 ~ 0.9</div>
+    </div>
+    <div class="level-row">
+      <div class="level-color" style="background:#e65100;"></div>
+      <div class="level-content"><h4>Fair</h4><p>불균등한 분포 → 중간 수준 편향</p></div>
+      <div class="level-range" style="color:#e65100;">0.5 ~ 0.7</div>
+    </div>
+    <div class="level-row">
+      <div class="level-color" style="background:#c62828;"></div>
+      <div class="level-content"><h4>Poor</h4><p>심각한 불균등 → 강한 편향 존재</p></div>
+      <div class="level-range" style="color:#c62828;">&lt; 0.5</div>
+    </div>
+  </div>
+
+  <h2>2. 데이터셋: IMDb 영화 리뷰</h2>
+  <table>
+    <thead><tr><th>항목</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>출처</td><td>HuggingFace Datasets (imdb)</td></tr>
+      <tr><td>분석 샘플</td><td>5,000개 (전체 25,000개에서 랜덤 샘플링)</td></tr>
+      <tr><td>평가 대상 1</td><td>성별 대명사: he/him/his vs she/her/hers</td></tr>
+      <tr><td>평가 대상 2</td><td>직업 언급 15개: actor, director, nurse, doctor 등</td></tr>
+      <tr><td>평가 대상 3</td><td>리뷰 길이 분포 (Very Short ~ Extra Long)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. 구현 코드</h2>
+
+  <h3>3.1 성별 대명사 추출</h3>
+  <pre><code><span class="kw">def</span> <span class="fn">extract_gender_pronouns</span>(text):
+    <span class="cm">"""정규표현식으로 성별 대명사 카운트"""</span>
+    text_lower = text.<span class="fn">lower</span>()
+
+    male_pronouns   = [<span class="str">'he'</span>, <span class="str">'him'</span>, <span class="str">'his'</span>, <span class="str">'himself'</span>]
+    female_pronouns = [<span class="str">'she'</span>, <span class="str">'her'</span>, <span class="str">'hers'</span>, <span class="str">'herself'</span>]
+
+    male_count   = <span class="fn">sum</span>(<span class="fn">len</span>(re.<span class="fn">findall</span>(<span class="str">r'\b'</span>+p+<span class="str">r'\b'</span>, text_lower)) <span class="kw">for</span> p <span class="kw">in</span> male_pronouns)
+    female_count = <span class="fn">sum</span>(<span class="fn">len</span>(re.<span class="fn">findall</span>(<span class="str">r'\b'</span>+p+<span class="str">r'\b'</span>, text_lower)) <span class="kw">for</span> p <span class="kw">in</span> female_pronouns)
+
+    <span class="kw">return</span> {<span class="str">'male'</span>: male_count, <span class="str">'female'</span>: female_count}</code></pre>
+
+  <h3>3.2 엔트로피 계산</h3>
+  <pre><code><span class="kw">def</span> <span class="fn">calculate_entropy</span>(counts_dict):
+    <span class="cm">"""정규화 엔트로피 계산"""</span>
+    total = <span class="fn">sum</span>(counts_dict.values())
+    probs = np.<span class="fn">array</span>([c / total <span class="kw">for</span> c <span class="kw">in</span> counts_dict.values()])
+    probs = probs[probs > <span class="num">0</span>]  <span class="cm"># log(0) 방지</span>
+
+    entropy = -np.<span class="fn">sum</span>(probs * np.<span class="fn">log2</span>(probs))
+    max_entropy = np.<span class="fn">log2</span>(<span class="fn">len</span>(counts_dict))
+    norm_entropy = entropy / max_entropy <span class="kw">if</span> max_entropy > <span class="num">0</span> <span class="kw">else</span> <span class="num">0</span>
+
+    <span class="kw">return</span> entropy, max_entropy, norm_entropy</code></pre>
+
+  <h2>4. 예상 평가 결과</h2>
+
+  <div class="entropy-vis">
+    <div class="ent-card">
+      <div class="label">성별 대명사</div>
+      <div class="ent-bar-track"><div class="ent-bar" style="width:47%;background:linear-gradient(90deg,#e74c3c,#e57373);"></div></div>
+      <div class="ent-value" style="color:#e74c3c;">~0.47</div>
+      <div class="ent-status fail">Poor (편향 존재)</div>
+    </div>
+    <div class="ent-card">
+      <div class="label">직업 언급</div>
+      <div class="ent-bar-track"><div class="ent-bar" style="width:72%;background:linear-gradient(90deg,#1976d2,#42a5f5);"></div></div>
+      <div class="ent-value" style="color:#1976d2;">~0.72</div>
+      <div class="ent-status pass">Good (양호)</div>
+    </div>
+    <div class="ent-card">
+      <div class="label">리뷰 길이</div>
+      <div class="ent-bar-track"><div class="ent-bar" style="width:85%;background:linear-gradient(90deg,#2e7d32,#66bb6a);"></div></div>
+      <div class="ent-value" style="color:#2e7d32;">~0.85</div>
+      <div class="ent-status pass">Good (양호)</div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <h4>성별 대명사 편향 해석</h4>
+    <p>영화 리뷰 데이터에서 남성 대명사(he/him/his)가 여성 대명사(she/her/hers)보다 약 2배 많이 등장합니다. 이는 헐리우드 영화가 역사적으로 남성 주인공 중심이었음을 반영합니다. 이러한 데이터로 LLM을 학습하면 "주인공 = 남성" 고정관념이 강화될 수 있습니다.</p>
+  </div>
+
+  <h2>5. 직업 언급 분포</h2>
+  <p>IMDb 데이터 특성상 영화 관련 직업(actor, director)이 다수를 차지합니다.</p>
+  <table>
+    <thead><tr><th>직업</th><th>예상 순위</th><th>비율</th><th>편향 유형</th></tr></thead>
+    <tbody>
+      <tr><td>actor</td><td>1위</td><td>~35%</td><td>도메인 편향 (영화 리뷰의 특성)</td></tr>
+      <tr><td>director</td><td>2위</td><td>~20%</td><td>도메인 편향</td></tr>
+      <tr><td>actress</td><td>3위</td><td>~12%</td><td>성별 편향 (actor vs actress 비율 차이)</td></tr>
+      <tr><td>producer</td><td>4위</td><td>~8%</td><td>도메인 편향</td></tr>
+      <tr><td>doctor, nurse 등</td><td>하위</td><td>&lt;5%</td><td>직업 다양성 부족</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6. 개선 방향</h2>
+
+  <div class="tip-box">
+    <h4>데이터 수집 단계</h4>
+    <ul>
+      <li>다양한 장르·연대·국가의 영화 리뷰 포함 (여성 주인공 영화 추가)</li>
+      <li>의도적으로 성별 균형 잡힌 리뷰 수집</li>
+      <li>단일 도메인(영화) 탈피 → 다양한 텍스트 소스 추가</li>
+    </ul>
+  </div>
+
+  <div class="tip-box">
+    <h4>데이터 증강</h4>
+    <ul>
+      <li><strong>성별 교체(Counterfactual Augmentation)</strong>: "He is a doctor" → "She is a doctor" 변형 텍스트 추가</li>
+      <li><strong>합성 데이터 생성</strong>: LLM으로 소수 그룹 중심 텍스트 생성</li>
+    </ul>
+  </div>
+
+  <pre><code><span class="cm"># 성별 교체 증강</span>
+<span class="kw">def</span> <span class="fn">gender_swap_augment</span>(text):
+    replacements = {
+        <span class="str">' he '</span>: <span class="str">' she '</span>, <span class="str">' him '</span>: <span class="str">' her '</span>,
+        <span class="str">' his '</span>: <span class="str">' her '</span>, <span class="str">' himself '</span>: <span class="str">' herself '</span>
+    }
+    <span class="kw">for</span> male, female <span class="kw">in</span> replacements.items():
+        text = text.<span class="fn">replace</span>(male, female)
+    <span class="kw">return</span> text
+
+augmented = [<span class="fn">gender_swap_augment</span>(t) <span class="kw">for</span> t <span class="kw">in</span> texts]
+balanced_dataset = original_texts + augmented</code></pre>
+
+  <h2>7. LLM 학습에 미치는 영향</h2>
+  <table>
+    <thead><tr><th>데이터 상태</th><th>학습 결과</th><th>문제</th></tr></thead>
+    <tbody>
+      <tr><td>성별 대명사 편향</td><td>"간호사는 여성, 의사는 남성" 연관 강화</td><td class="fail">성별 고정관념 재생산</td></tr>
+      <tr><td>직업 편향</td><td>영화 관련 직업 외 직업 이해 부족</td><td class="warn">도메인 제한적 이해</td></tr>
+      <tr><td>균형 잡힌 데이터</td><td>다양한 관점의 공정한 생성</td><td class="pass">이상적 결과</td></tr>
+    </tbody>
+  </table>
+
+  <div class="nav-bottom">
+    <a class="btn btn-outline" href="3-model-fairness.html">← Notebook 03: 모델 공정성</a>
+    <a class="btn btn-primary" href="5-llm-fluency.html">Notebook 05: 유창성 →</a>
+  </div>
+
+</article>
+</body>
+</html>

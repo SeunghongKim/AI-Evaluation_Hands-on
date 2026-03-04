@@ -1,0 +1,36 @@
+# GitHub Pages Configuration
+title: AI 평가·검증 실습 Lab
+description: 데이터 편향과 모델 공정성·안전성을 직접 검증해보는 인터랙티브 실습 환경
+author: AI Evaluation Lab
+
+# SEO
+lang: ko-KR
+tagline: AI Fairness & Safety Evaluation Lab
+
+# Build settings (순수 HTML — Jekyll 테마 비활성화)
+theme: null
+
+markdown: kramdown
+encoding: utf-8
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/
+  - .sass-cache/
+  - .jekyll-cache/
+  - venv/
+  - __pycache__/
+  - "*.pyc"
+  - requirements.txt
+  - update_links.py
+  - DEPLOYMENT.md
+  - README.md
+
+# Include
+include:
+  - notebooks
+  - assets
+  - docs

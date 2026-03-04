@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM 모델 유창성 평가 (Perplexity) | AI 평가·검증 Lab</title>
+  <style>
+    :root {
+      --primary: #667eea; --secondary: #764ba2;
+      --accent: #00695c; --bg: #f7f8fc; --card: #ffffff;
+      --text: #2d3748; --muted: #718096; --border: #e2e8f0;
+      --code-bg: #1e2130; --pass: #2e7d32; --fail: #c62828;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+    nav { background: rgba(255,255,255,.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+    .nav-logo { font-size: 1rem; font-weight: 700; background: linear-gradient(135deg,var(--primary),var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }
+    .breadcrumb { font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .breadcrumb a { color: var(--primary); text-decoration: none; }
+
+    .hero { background: linear-gradient(135deg, #004d40 0%, #00695c 60%, #00897b 100%); color: white; padding: 60px 24px 50px; }
+    .hero-inner { max-width: 900px; margin: 0 auto; }
+    .hero-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .chip { background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4); border-radius: 20px; padding: 4px 14px; font-size: 0.8rem; font-weight: 600; }
+    .hero h1 { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 800; margin-bottom: 12px; }
+    .hero p { opacity: .9; font-size: 1.05rem; max-width: 640px; }
+
+    article { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    h2 { font-size: 1.45rem; font-weight: 700; margin: 48px 0 16px; color: var(--text); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+    h3 { font-size: 1.15rem; font-weight: 700; margin: 28px 0 12px; color: var(--text); }
+    p { margin-bottom: 14px; color: var(--text); font-size: 0.97rem; }
+
+    .info-box { background: #e0f2f1; border-left: 4px solid var(--accent); border-radius: 8px; padding: 18px 22px; margin: 20px 0; }
+    .info-box h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--accent); }
+    .info-box p { margin: 0; font-size: 0.9rem; }
+
+    .formula-box { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin: 20px 0; text-align: center; }
+    .formula { font-size: 1.1rem; font-family: 'Georgia', serif; color: var(--text); line-height: 2.2; }
+    .formula-caption { font-size: 0.85rem; color: var(--muted); margin-top: 8px; line-height: 1.8; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 16px 0; }
+    th { background: var(--bg); padding: 11px 14px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); }
+    tr:hover td { background: #fafafe; }
+    .pass { color: var(--pass); font-weight: 700; }
+    .fail { color: var(--fail); font-weight: 700; }
+    .warn { color: #e65100; font-weight: 700; }
+
+    pre { background: var(--code-bg); color: #abb2bf; padding: 20px 24px; border-radius: 10px; overflow-x: auto; font-size: 0.87rem; line-height: 1.7; font-family: 'Fira Code','Consolas',monospace; margin: 16px 0; }
+    .kw { color: #c678dd; } .fn { color: #61afef; } .str { color: #98c379; } .cm { color: #5c6370; font-style: italic; } .num { color: #d19a66; }
+
+    .score-scale { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin: 20px 0; }
+    .score-cell { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 14px 8px; text-align: center; }
+    .score-cell .num { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .score-cell .level { font-size: 0.78rem; font-weight: 700; }
+    .score-cell .desc { font-size: 0.73rem; color: var(--muted); margin-top: 4px; }
+
+    .ppl-scale { background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 20px 0; }
+    .ppl-row { display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+    .ppl-row:last-child { border-bottom: none; }
+    .ppl-bar-col { flex: 1; padding: 12px 16px; }
+    .ppl-label { font-size: 0.88rem; font-weight: 700; margin-bottom: 4px; }
+    .ppl-bar-track { background: var(--bg); border-radius: 4px; height: 10px; }
+    .ppl-bar { height: 10px; border-radius: 4px; }
+    .ppl-range { width: 130px; padding: 12px 16px; font-size: 0.85rem; font-weight: 700; text-align: right; }
+    .ppl-score { width: 80px; padding: 12px 8px; font-size: 0.85rem; font-weight: 700; text-align: center; }
+
+    .method-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+    .method-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+    .method-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .method-card p { font-size: 0.88rem; color: var(--muted); margin: 0; }
+    .method-card .pros { color: var(--pass); font-size: 0.82rem; margin-top: 8px; font-weight: 600; }
+    .method-card .cons { color: var(--fail); font-size: 0.82rem; margin-top: 4px; font-weight: 600; }
+
+    .tip-box { background: #f8fff8; border: 1px solid #c8e6c9; border-radius: 10px; padding: 18px 22px; margin: 20px 0; }
+    .tip-box h4 { font-size: 0.95rem; font-weight: 700; color: var(--pass); margin-bottom: 8px; }
+    .tip-box ul { padding-left: 18px; }
+    .tip-box li { font-size: 0.9rem; color: var(--text); margin-bottom: 5px; }
+
+    .nav-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: all .2s; }
+    .btn-primary { background: linear-gradient(135deg,var(--primary),var(--secondary)); color: white; }
+    .btn-primary:hover { opacity: .9; }
+    .btn-outline { border: 2px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    @media(max-width:640px) { .score-scale { grid-template-columns: repeat(3,1fr); } .method-cards { grid-template-columns: 1fr; } article { padding: 32px 16px 60px; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">🔬 AI 평가·검증 Lab</a>
+    <div class="breadcrumb">
+      <a href="../index.html">홈</a> › <span>Notebook 05</span>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-meta">
+      <span class="chip">Notebook 05</span>
+      <span class="chip">생성형 AI · LLM</span>
+      <span class="chip">모델 성능</span>
+    </div>
+    <h1>📝 모델 유창성 평가</h1>
+    <p>DistilGPT-2가 생성한 텍스트의 자연스러움을 Perplexity와 규칙 기반 점수를 결합한 LLM-as-a-Judge 방식으로 측정합니다.</p>
+  </div>
+</div>
+
+<article>
+
+  <h2>1. 유창성이란?</h2>
+  <p><strong>유창성(Fluency)</strong>은 생성된 텍스트가 문법적으로 올바르고, 자연스러우며, 일관성 있는지를 측정하는 지표입니다. LLM 품질 평가의 핵심 기준 중 하나입니다.</p>
+
+  <div class="score-scale">
+    <div class="score-cell">
+      <div class="num" style="color:#c62828;">1</div>
+      <div class="level" style="color:#c62828;">Very Poor</div>
+      <div class="desc">심각한 오류, 거의 이해 불가</div>
+    </div>
+    <div class="score-cell">
+      <div class="num" style="color:#e65100;">2</div>
+      <div class="level" style="color:#e65100;">Poor</div>
+      <div class="desc">여러 오류, 이해하기 어려움</div>
+    </div>
+    <div class="score-cell">
+      <div class="num" style="color:#f57f17;">3</div>
+      <div class="level" style="color:#f57f17;">Fair</div>
+      <div class="desc">명백한 오류, 이해는 가능</div>
+    </div>
+    <div class="score-cell">
+      <div class="num" style="color:#1565c0;">4</div>
+      <div class="level" style="color:#1565c0;">Good</div>
+      <div class="desc">사소한 문제, 전반적으로 양호</div>
+    </div>
+    <div class="score-cell">
+      <div class="num" style="color:#2e7d32;">5</div>
+      <div class="level" style="color:#2e7d32;">Excellent</div>
+      <div class="desc">완벽한 문법, 매우 자연스러움</div>
+    </div>
+  </div>
+
+  <h2>2. 평가 방법 1: Perplexity</h2>
+  <p><strong>Perplexity(PPL)</strong>는 언어 모델이 텍스트를 얼마나 "예상 가능"하게 느끼는지를 측정합니다. 낮을수록 더 자연스럽고 유창한 텍스트입니다.</p>
+
+  <div class="formula-box">
+    <div class="formula">PPL(W) = exp(−<sup>1</sup>/<sub>N</sub> Σ log P(w<sub>i</sub>|w<sub>1</sub>...w<sub>i-1</sub>))</div>
+    <div class="formula-caption">
+      = exp(Cross-Entropy Loss) &nbsp;·&nbsp;
+      <strong>낮은 PPL</strong> → 모델이 예측하기 쉬운 텍스트 → 유창함<br>
+      <strong>주의</strong>: 창의적이고 독특한 표현도 PPL이 높게 나올 수 있어 단독 지표로는 한계가 있음
+    </div>
+  </div>
+
+  <div class="ppl-scale">
+    <div class="ppl-row">
+      <div class="ppl-bar-col">
+        <div class="ppl-label" style="color:#2e7d32;">Excellent</div>
+        <div class="ppl-bar-track"><div class="ppl-bar" style="width:20%;background:#2e7d32;"></div></div>
+      </div>
+      <div class="ppl-range" style="color:#2e7d32;">PPL &lt; 50</div>
+      <div class="ppl-score" style="color:#2e7d32;">→ Score 5</div>
+    </div>
+    <div class="ppl-row">
+      <div class="ppl-bar-col">
+        <div class="ppl-label" style="color:#1565c0;">Good</div>
+        <div class="ppl-bar-track"><div class="ppl-bar" style="width:40%;background:#1565c0;"></div></div>
+      </div>
+      <div class="ppl-range" style="color:#1565c0;">50 ~ 100</div>
+      <div class="ppl-score" style="color:#1565c0;">→ Score 4</div>
+    </div>
+    <div class="ppl-row">
+      <div class="ppl-bar-col">
+        <div class="ppl-label" style="color:#f57f17;">Fair</div>
+        <div class="ppl-bar-track"><div class="ppl-bar" style="width:60%;background:#f57f17;"></div></div>
+      </div>
+      <div class="ppl-range" style="color:#f57f17;">100 ~ 200</div>
+      <div class="ppl-score" style="color:#f57f17;">→ Score 3</div>
+    </div>
+    <div class="ppl-row">
+      <div class="ppl-bar-col">
+        <div class="ppl-label" style="color:#e65100;">Poor</div>
+        <div class="ppl-bar-track"><div class="ppl-bar" style="width:80%;background:#e65100;"></div></div>
+      </div>
+      <div class="ppl-range" style="color:#e65100;">200 ~ 400</div>
+      <div class="ppl-score" style="color:#e65100;">→ Score 2</div>
+    </div>
+    <div class="ppl-row">
+      <div class="ppl-bar-col">
+        <div class="ppl-label" style="color:#c62828;">Very Poor</div>
+        <div class="ppl-bar-track"><div class="ppl-bar" style="width:100%;background:#c62828;"></div></div>
+      </div>
+      <div class="ppl-range" style="color:#c62828;">PPL &gt; 400</div>
+      <div class="ppl-score" style="color:#c62828;">→ Score 1</div>
+    </div>
+  </div>
+
+  <h3>Perplexity 계산 코드</h3>
+  <pre><code><span class="kw">def</span> <span class="fn">calculate_perplexity</span>(text, model, tokenizer):
+    <span class="cm">"""GPT-2로 Perplexity 계산"""</span>
+    encodings = <span class="fn">tokenizer</span>(text, return_tensors=<span class="str">"pt"</span>).to(device)
+
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        outputs = <span class="fn">model</span>(**encodings, labels=encodings[<span class="str">"input_ids"</span>])
+        loss = outputs.loss
+
+    perplexity = torch.<span class="fn">exp</span>(loss).<span class="fn">item</span>()
+    <span class="kw">return</span> perplexity</code></pre>
+
+  <h2>3. 평가 방법 2: 규칙 기반 점수</h2>
+  <p>Perplexity를 보완하는 규칙 기반 평가로 반복, 문장 완성도, 단어 다양성을 측정합니다.</p>
+
+  <table>
+    <thead><tr><th>평가 항목</th><th>기준</th><th>감점</th></tr></thead>
+    <tbody>
+      <tr><td>문장 길이</td><td>단어 수 &lt; 5 → 너무 짧음</td><td>-1.5점</td></tr>
+      <tr><td>반복 단어 비율</td><td>고유어 비율 &lt; 70% (반복 &gt; 30%)</td><td>-1.0점</td></tr>
+      <tr><td>연속 중복 단어</td><td>"the the", "very very" 등 3회 이상</td><td>-1.0점</td></tr>
+      <tr><td>문장 완성도</td><td>마침표·느낌표·물음표로 끝나지 않음</td><td>-0.5점</td></tr>
+      <tr><td>평균 단어 길이</td><td>평균 3자 미만 (단음절 단어 집중)</td><td>-0.5점</td></tr>
+    </tbody>
+  </table>
+
+  <pre><code><span class="kw">def</span> <span class="fn">rule_based_fluency_score</span>(text):
+    score = <span class="num">5.0</span>
+    words = text.<span class="fn">split</span>()
+
+    <span class="cm"># 1. 반복 단어 비율</span>
+    repetition_ratio = <span class="num">1</span> - (<span class="fn">len</span>(<span class="fn">set</span>(words)) / <span class="fn">len</span>(words))
+    <span class="kw">if</span> repetition_ratio > <span class="num">0.3</span>:
+        score -= <span class="num">1.0</span>
+
+    <span class="cm"># 2. 연속 중복</span>
+    consecutive = <span class="fn">sum</span>(<span class="num">1</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(words)-<span class="num">1</span>) <span class="kw">if</span> words[i] == words[i+<span class="num">1</span>])
+    <span class="kw">if</span> consecutive > <span class="num">2</span>:
+        score -= <span class="num">1.0</span>
+
+    <span class="cm"># 3. 문장 완성도</span>
+    <span class="kw">if not</span> text.<span class="fn">strip</span>().<span class="fn">endswith</span>((<span class="str">'.'</span>, <span class="str">'!'</span>, <span class="str">'?'</span>)):
+        score -= <span class="num">0.5</span>
+
+    <span class="kw">return</span> <span class="fn">max</span>(<span class="num">1.0</span>, <span class="fn">min</span>(<span class="num">5.0</span>, score))</code></pre>
+
+  <h2>4. 종합 점수</h2>
+  <p>두 방법의 장점을 결합하여 최종 유창성 점수를 계산합니다.</p>
+  <pre><code>combined_score = (rule_based_score + perplexity_based_score) / <span class="num">2</span></code></pre>
+
+  <h2>5. 두 평가 방법 비교</h2>
+  <div class="method-cards">
+    <div class="method-card">
+      <h4>📐 규칙 기반</h4>
+      <p>사전 정의된 규칙(반복, 길이 등)으로 점수를 계산합니다.</p>
+      <div class="pros">✅ 빠름, 해석 가능, 오프라인</div>
+      <div class="cons">❌ 맥락 이해 불가, 새로운 오류 패턴 탐지 어려움</div>
+    </div>
+    <div class="method-card">
+      <h4>🤖 Perplexity 기반</h4>
+      <p>언어 모델이 텍스트의 확률을 계산하여 유창성을 측정합니다.</p>
+      <div class="pros">✅ 맥락 고려, 미묘한 표현 평가 가능</div>
+      <div class="cons">❌ 창의적 표현 과소평가, 계산 비용 높음</div>
+    </div>
+  </div>
+
+  <h2>6. 개선 방향</h2>
+
+  <div class="tip-box">
+    <h4>생성 파라미터 튜닝</h4>
+    <ul>
+      <li><strong>Temperature 0.6~0.7</strong>: 더 안전하고 유창한 출력</li>
+      <li><strong>Repetition Penalty 1.2</strong>: 반복 단어 억제</li>
+      <li><strong>no_repeat_ngram_size=3</strong>: 3-gram 반복 금지</li>
+    </ul>
+  </div>
+
+  <pre><code>outputs = model.<span class="fn">generate</span>(
+    inputs,
+    temperature=<span class="num">0.7</span>,
+    top_p=<span class="num">0.9</span>,
+    repetition_penalty=<span class="num">1.2</span>,
+    no_repeat_ngram_size=<span class="num">3</span>,
+    max_length=<span class="num">100</span>
+)</code></pre>
+
+  <div class="tip-box">
+    <h4>고급 평가 방법</h4>
+    <ul>
+      <li><strong>BERTScore</strong>: 참조 텍스트와의 의미적 유사도 측정</li>
+      <li><strong>GPT-4 as a Judge</strong>: 강력한 모델을 평가자로 활용</li>
+      <li><strong>Human Evaluation</strong>: 사람이 직접 유창성 평가 (Gold Standard)</li>
+    </ul>
+  </div>
+
+  <h2>7. 유창성과 다른 품질 지표의 균형</h2>
+  <table>
+    <thead><tr><th>트레이드오프</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td>유창성 vs 창의성</td><td>너무 안전한 출력은 지루하고 뻔할 수 있음</td></tr>
+      <tr><td>유창성 vs 사실성</td><td>문법적으로 완벽해도 내용이 틀릴 수 있음</td></tr>
+      <tr><td>유창성 vs 다양성</td><td>모든 출력이 비슷한 패턴이면 활용성 저하</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <h4>다면적 평가 권장</h4>
+    <p>유창성 단독으로는 LLM 품질을 충분히 평가할 수 없습니다. <strong>유창성 + 관련성 + 사실성 + 다양성 + 안전성</strong>을 함께 측정하는 종합 평가 체계를 구축해야 합니다.</p>
+  </div>
+
+  <div class="nav-bottom">
+    <a class="btn btn-outline" href="4-llm-representativeness.html">← Notebook 04: 대표성 편향</a>
+    <a class="btn btn-primary" href="6-llm-toxicity.html">Notebook 06: 유해성 →</a>
+  </div>
+
+</article>
+</body>
+</html>
