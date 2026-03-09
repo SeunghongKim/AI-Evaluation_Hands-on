@@ -1,4 +1,4 @@
-# 🔬 AI 평가·검증 실습 Lab
+# AI 평가·검증 Hands-on 자료
 
 [![Jupyter](https://img.shields.io/badge/Jupyter-F37626.svg?&style=for-the-badge&logo=Jupyter&logoColor=white)](https://jupyter.org/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -7,7 +7,7 @@
 
 **데이터 편향과 모델 공정성·안전성을 직접 검증해보는 인터랙티브 실습 환경**
 
-> 📘 본 프로젝트는 **AI 평가·검증 가이드 v1.0**에 기반하여 제작되었습니다.
+> 📘 본 프로젝트는 **AI 평가·검증 가이드**에 기반하여 제작되었습니다.
 
 ---
 
