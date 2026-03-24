@@ -1,0 +1,227 @@
+.fairnessTree {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.treeTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-neutral-700);
+  margin-bottom: 14px;
+}
+
+.treeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.metricBtn {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-50);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.metricBtn:hover {
+  background: var(--color-neutral-100);
+  border-color: var(--color-accent);
+}
+
+.metricBtnActive {
+  background: #eff6ff;
+  border-color: var(--color-accent);
+}
+
+.metricBtnCode {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.metricBtnLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+}
+
+.metricBtnDesc {
+  font-size: 0.72rem;
+  color: var(--color-neutral-500);
+  line-height: 1.4;
+}
+
+.selectedInfo {
+  font-size: 0.85rem;
+  color: var(--color-neutral-700);
+  background: var(--color-neutral-100);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.inputSection {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.inputHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.inputTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-neutral-700);
+}
+
+.inputActions {
+  display: flex;
+  gap: 8px;
+}
+
+.exBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-border);
+  background: transparent;
+  color: var(--color-neutral-600);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.groupsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.groupCard {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: var(--color-neutral-50);
+}
+
+.groupCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.groupNameInput {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  background: #fff;
+  flex: 1;
+  margin-right: 6px;
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.removeBtn:hover {
+  color: var(--color-danger);
+}
+
+.cmMini {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.cmMiniCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cmMiniLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-neutral-500);
+  font-family: var(--font-mono);
+}
+
+.cmMiniInput {
+  padding: 4px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
+  background: #fff;
+}
+
+.resultsSection {
+  margin-top: 4px;
+}
+
+.overallResult {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.overallLabel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-neutral-700);
+}
+
+.ratioDisplay {
+  font-size: 0.85rem;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.groupMetrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}

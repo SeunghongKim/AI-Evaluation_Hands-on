@@ -1,3 +1,8 @@
+# Node.js
+node_modules/
+dist/
+*.tsbuildinfo
+
 # Python
 __pycache__/
 *.py[cod]
@@ -10,7 +15,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/  -- disabled to allow src/lib/
 lib64/
 parts/
 sdist/

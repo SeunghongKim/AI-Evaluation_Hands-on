@@ -1,0 +1,179 @@
+.tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  background: var(--color-neutral-100);
+  padding: 4px;
+  border-radius: var(--radius-md);
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  min-width: 70px;
+}
+
+.tab:hover {
+  background: var(--color-neutral-200);
+}
+
+.tabActive {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.tabId {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--color-neutral-500);
+  margin-bottom: 2px;
+}
+
+.tabName {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+}
+
+.tabActive .tabId {
+  color: var(--color-accent);
+}
+
+.tabActive .tabName {
+  color: var(--color-primary);
+}
+
+.metricPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.metricId {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #7c3aed;
+  background: #f5f3ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.metricName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+}
+
+.metricDesc {
+  font-size: 0.88rem;
+  color: var(--color-neutral-700);
+  margin-bottom: 4px;
+}
+
+.metricNote {
+  font-size: 0.82rem;
+  color: var(--color-neutral-500);
+  margin-bottom: 16px;
+  background: var(--color-neutral-100);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.scoreInput {
+  margin-top: 8px;
+}
+
+.scoreRow {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.scoreField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.scoreNum {
+  width: 140px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  background: var(--color-neutral-50);
+}
+
+.distinctInput {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.distinctTextarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  resize: vertical;
+  background: var(--color-neutral-50);
+}
+
+.distinctResults {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.distinctStat {
+  background: var(--color-neutral-100);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dStatLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+}
+
+.dStatValue {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+  font-variant-numeric: tabular-nums;
+}

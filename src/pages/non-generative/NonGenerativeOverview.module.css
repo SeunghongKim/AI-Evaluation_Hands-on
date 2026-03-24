@@ -1,0 +1,139 @@
+.page {
+  padding: 24px 32px 48px;
+  max-width: 960px;
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.tag {
+  display: inline-block;
+  background: #eff6ff;
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  letter-spacing: 0.04em;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-bottom: 10px;
+}
+
+.desc {
+  font-size: 0.92rem;
+  color: var(--color-neutral-700);
+  line-height: 1.7;
+  max-width: 640px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardId {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--color-accent);
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.cardCat {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.catData {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.catModel {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.cardName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+}
+
+.cardDesc {
+  font-size: 0.85rem;
+  color: var(--color-neutral-500);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.passRule {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+}
+
+.sourceBadge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.sourceGreen {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.sourceAmber {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.sourceBlue {
+  background: #dbeafe;
+  color: #1e40af;
+}

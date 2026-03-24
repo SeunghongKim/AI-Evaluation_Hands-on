@@ -1,0 +1,222 @@
+.inputSection {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.inputLabel {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  flex-shrink: 0;
+}
+
+.select {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  background: var(--color-surface);
+  color: var(--color-neutral-700);
+}
+
+.exampleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.exampleLabel {
+  font-size: 0.82rem;
+  color: var(--color-neutral-500);
+  flex-shrink: 0;
+}
+
+.exBtn {
+  padding: 4px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-neutral-700);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exBtn:hover {
+  background: var(--color-neutral-100);
+}
+
+.exBtnActive {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.inputTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.inputField {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  background: var(--color-neutral-50);
+}
+
+.inputField:focus {
+  outline: 2px solid var(--color-accent);
+  border-color: var(--color-accent);
+  background: #fff;
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.removeBtn:hover {
+  color: var(--color-danger);
+  background: #fee2e2;
+}
+
+.addBtn {
+  margin-top: 10px;
+  padding: 7px 16px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-neutral-500);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addBtn:hover {
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-700);
+}
+
+.resultsSection {
+  margin-top: 4px;
+}
+
+.resultsTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-neutral-700);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.totalResult {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.totalLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.totalValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-neutral-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.totalThreshold {
+  font-size: 0.82rem;
+  color: var(--color-neutral-500);
+  margin-left: auto;
+}
+
+.binDetails {
+  margin-top: 16px;
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.resultTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.ok {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.warn {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.interpretation {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-50);
+  border: 1px solid var(--color-border);
+}
+
+.interpretation h4 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-neutral-700);
+  margin-bottom: 6px;
+}
+
+.passText {
+  font-size: 0.88rem;
+  color: var(--color-success);
+  line-height: 1.6;
+}
+
+.failText {
+  font-size: 0.88rem;
+  color: var(--color-danger);
+  line-height: 1.6;
+}

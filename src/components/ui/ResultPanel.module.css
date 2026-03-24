@@ -1,0 +1,91 @@
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  transition: border-color 0.2s;
+}
+
+.passBorder {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.failBorder {
+  border-color: #fca5a5;
+  background: #fff5f5;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-neutral-900);
+  line-height: 1;
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-neutral-500);
+  margin-left: 4px;
+}
+
+.threshold {
+  font-size: 0.8rem;
+  color: var(--color-neutral-500);
+  margin-bottom: 8px;
+}
+
+.direction {
+  color: var(--color-neutral-400);
+}
+
+.interpretation {
+  font-size: 0.85rem;
+  color: var(--color-neutral-700);
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+.barWrap {
+  margin-top: 12px;
+  height: 6px;
+  background: var(--color-neutral-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.barPass {
+  background: var(--color-success);
+}
+
+.barFail {
+  background: var(--color-danger);
+}
+
+.barNeutral {
+  background: var(--color-accent);
+}

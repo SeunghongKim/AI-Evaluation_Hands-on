@@ -1,0 +1,113 @@
+.inputSection {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--color-neutral-500);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.exBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-border);
+  background: transparent;
+  color: var(--color-neutral-600);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.inputTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.inputField {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  background: var(--color-neutral-50);
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 6px;
+}
+
+.removeBtn:hover {
+  color: var(--color-danger);
+}
+
+.resultsSection {
+  margin-top: 4px;
+}
+
+.metricsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.presetRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.presetLabel {
+  font-size: 0.82rem;
+  color: var(--color-neutral-500);
+  align-self: center;
+}
+
+.presetBtn {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.presetBtn:hover {
+  background: var(--color-neutral-100);
+}

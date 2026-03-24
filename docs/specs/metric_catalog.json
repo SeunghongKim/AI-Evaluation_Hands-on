@@ -1,0 +1,477 @@
+[
+  {
+    "section_id": "ML-D-01",
+    "category": "비생성형",
+    "metric_name": "표본 편향",
+    "manual_description": "학습/검증/1차시험/2차시험 데이터가 원천데이터(모집단)를 통계적으로 잘 대표하는지 보호변수 기준으로 측정",
+    "metric_formula_or_method": "PSI = Σ (학습데이터 구성비_i - 원천데이터 구성비_i) × ln(학습데이터 구성비_i / 원천데이터 구성비_i). 보호변수 기준으로 그룹화 후 각 그룹별 PSI 합산.",
+    "pass_rule": "PSI < 0.25",
+    "pass_rule_source": "manual_table",
+    "pass_rule_table_ref": "표 2.2.3",
+    "input_data_schema": {
+      "required": ["원천데이터 보호변수별 구성비 (dict)", "학습/검증/1차시험/2차시험 데이터 보호변수별 구성비 (dict)"],
+      "protected_variables_example": ["성별", "연령", "학력", "인종", "장애 여부"]
+    },
+    "github_pages_feasibility": "직접 산출 가능",
+    "github_pages_feasibility_detail": "PSI 산식은 순수 수치 연산이므로 JavaScript로 계산 가능. 사전에 구성비 데이터를 JSON으로 로드.",
+    "implementation_strategy": "Notebook에서 PSI 계산 → 결과 JSON 저장 → 정적 페이지에서 시각화. 또는 페이지 내 인터랙티브 입력 폼으로 사용자가 직접 구성비 입력 후 계산.",
+    "current_repo_status": "구현완료",
+    "redesign_notes": "기존 NB01 구현과 기준 일치. 보완점: 4개 데이터셋(학습/검증/1차/2차) 전부 검증하도록 확장 권고. 사회적 편향(ML-D-03)과의 차이점 명확히 안내 필요."
+  },
+  {
+    "section_id": "ML-D-02",
+    "category": "비생성형",
+    "metric_name": "라벨링 편향",
+    "manual_description": "학습데이터의 각 라벨에 대해 보호변수 그룹 간 비율 차이가 존재하는지 측정. 하나 이상의 라벨이 기준 미달이면 라벨링 편향 존재.",
+    "metric_formula_or_method": "각 라벨별로 보호변수 그룹화 → 그룹별 라벨 비율 계산 → 최저 비율 / 최고 비율 산출. 모든 라벨에 대해 검증.",
+    "pass_rule": "최저/최고 비중 ≥ 0.8",
+    "pass_rule_source": "manual_table",
+    "pass_rule_table_ref": "표 2.2.6",
+    "input_data_schema": {
+      "required": ["학습데이터 또는 2차시험데이터", "보호변수 컬럼", "결과변수(라벨) 컬럼"],
+      "label_example": ["근로소득자", "사업자", "무직"]
+    },
+    "github_pages_feasibility": "직접 산출 가능",
+    "github_pages_feasibility_detail": "비율 계산만 필요하므로 JavaScript로 직접 계산 가능.",
+    "implementation_strategy": "Notebook에서 라벨별 그룹 비율 계산 → 결과 JSON → 정적 페이지 시각화. 인터랙티브 테이블로 사용자 입력 가능.",
+    "current_repo_status": "구현완료",
+    "redesign_notes": "기준 일치. 개선: 현재 repo 카드에 '4/5 Rule' 표기 있으나 문서는 이 용어 미사용 → '최저/최고 라벨링 그룹 비중 ≥ 0.8'로 표기 변경 권고."
+  },
+  {
+    "section_id": "ML-D-03",
+    "category": "비생성형",
+    "metric_name": "사회적 편향",
+    "manual_description": "학습/검증/1차·2차시험 데이터가 보호변수 기준으로 그룹화했을 때 그룹 간 속성 분포에 통계적 차이가 있는지 측정. 표본 편향(원천↔부분 비교)과 달리 보호변수 그룹 간(예: 남↔여) 비교.",
+    "metric_formula_or_method": "보호변수 기준으로 데이터를 상호배타적으로 그룹화 → 그룹별로 다른 속성(예: 나이, 직업)의 구성비 계산 → 그룹 간 PSI 측정.",
+    "pass_rule": "PSI < 0.2",
+    "pass_rule_source": "manual_method_example",
+    "pass_rule_table_ref": "P192 (예시 텍스트: '모두 0.2 이하일 경우 편향 없음')",
+    "input_data_schema": {
+      "required": ["보호변수 컬럼 (그룹화 기준)", "측정 대상 속성 컬럼들"],
+      "example": "성별(그룹화) × 나이 속성 PSI"
+    },
+    "github_pages_feasibility": "직접 산출 가능",
+    "github_pages_feasibility_detail": "PSI 산식 재사용 가능. 그룹 간 비교 방향만 다름.",
+    "implementation_strategy": "표본 편향 노트북 확장 또는 별도 노트북 신규 추가. 그룹 A vs 그룹 B 구성비 데이터 사전 계산 후 JSON 저장.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "주의: 통과기준 0.2는 예시 텍스트에서만 언급됨(manual_method_example). 표 2.2.3의 표본 편향 기준(0.25)과 다름 → UI에서 출처 명시 필수."
+  },
+  {
+    "section_id": "ML-M-01",
+    "category": "비생성형",
+    "metric_name": "서비스 품질",
+    "manual_description": "AI 모델이 주어진 예측 또는 분류 과제를 정확하게 수행하는 능력. Task 유형에 따라 지표 선택.",
+    "metric_formula_or_method": "Task 유형별 [표 2.2.9] 참조. 분류: Accuracy = (TP+TN)/(TP+FP+FN+TN), Precision = TP/(TP+FP), Recall = TP/(TP+FN), F1 = 2×Precision×Recall/(Precision+Recall). 혼동행렬 기반 계산.",
+    "pass_rule": "Accuracy ≥ 0.8, Precision ≥ 0.8, Recall ≥ 0.8, F1-Score ≥ 0.8",
+    "pass_rule_source": "manual_table",
+    "pass_rule_table_ref": "표 2.2.11",
+    "input_data_schema": {
+      "required": ["2차시험데이터 실제값 (ground truth)", "AI 모델 예측값"],
+      "output": "혼동행렬(TP, FP, FN, TN)"
+    },
+    "github_pages_feasibility": "직접 산출 가능",
+    "github_pages_feasibility_detail": "혼동행렬 수치 입력 시 JavaScript로 계산 가능. 또는 Notebook에서 사전 계산 후 결과 표시.",
+    "implementation_strategy": "sklearn confusion_matrix → 지표 계산 → 결과 JSON 저장 → 인터랙티브 혼동행렬 시각화 페이지.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "NB03(모델 공정성)에 부분 포함 가능하나 별도 노트북으로 분리 권고. 통과기준 가장 명확한 항목 중 하나."
+  },
+  {
+    "section_id": "ML-M-02",
+    "category": "비생성형",
+    "metric_name": "모델 공정성",
+    "manual_description": "AI 모델의 출력 결과가 보호변수 그룹에 미치는 영향을 혼동행렬로 측정. Fairness Tree를 활용하여 서비스 특성에 맞는 공정성 지표 선택.",
+    "metric_formula_or_method": "Fairness Tree 기반 6개 지표(FPR, FDR, FNR, FOR, PPV, NPV 등) 중 서비스 특성에 따라 선택. 보호변수 그룹별 혼동행렬 산출 후 4/5 Rule 적용: min(그룹별 지표) / max(그룹별 지표) ≥ 0.8.",
+    "pass_rule": "최저/최고 비중 ≥ 0.8 (4/5 Rule)",
+    "pass_rule_source": "manual_table",
+    "pass_rule_table_ref": "표 2.2.13",
+    "input_data_schema": {
+      "required": ["보호변수 컬럼", "모델 예측값", "실제 라벨값"],
+      "grouping": "보호변수 기준 상호배타적 그룹화"
+    },
+    "github_pages_feasibility": "직접 산출 가능",
+    "github_pages_feasibility_detail": "그룹별 혼동행렬 계산 후 4/5 Rule 적용은 JavaScript로 가능.",
+    "implementation_strategy": "기존 NB03을 수정: 통과기준 Gap < 0.10 → 4/5 Rule(≥ 0.8)로 변경. Fairness Tree 의사결정 안내 UI 추가.",
+    "current_repo_status": "부분구현",
+    "redesign_notes": "긴급 수정 필요: 현재 통과기준 'Gap < 0.10'은 문서 근거 없음 → '최저/최고 비중 ≥ 0.8'로 수정. Fairness Tree 선택 가이드 추가."
+  },
+  {
+    "section_id": "ML-M-03",
+    "category": "비생성형",
+    "metric_name": "설명가능성",
+    "manual_description": "AI 모델 예측/판단 결과가 사람에게 이해 가능한 방식으로 설명될 수 있는 능력. 특성 기여도 시각화.",
+    "metric_formula_or_method": "모델 알고리즘에 따라 xAI 기술 선정: 트리 기반 → TreeSHAP, 딥러닝 → DeepSHAP, 범용 → LIME. 특성 벡터 정의 → xAI 적용 → SHAP 값 시각화.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["학습된 AI 모델 객체", "테스트 데이터(X_test)", "특성명 리스트"],
+      "output": "SHAP 값 행렬 또는 LIME 설명 객체"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "SHAP 계산은 Python 환경 필요. 사전 계산된 SHAP 값을 JSON으로 저장 후 정적 페이지에서 시각화.",
+    "implementation_strategy": "Notebook에서 SHAP 값 계산 → shap_values.json 저장 → 정적 페이지에서 bar chart/waterfall plot 시각화 (D3.js 또는 Chart.js 활용).",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 없음 → 시각화 결과 제공 및 해석 가이드 제공 방식으로 구현. '협의 필요' 안내 명시."
+  },
+  {
+    "section_id": "LLM-D-01",
+    "category": "생성형",
+    "metric_name": "대표성 편향",
+    "manual_description": "학습/1차·2차시험 데이터에서 특정 속성(집단, 주제, 언어)이 과소/과대 표현되는지 여부. NER 등 분류기로 속성별 빈도 추출 후 Entropy 측정.",
+    "metric_formula_or_method": "NER(Named Entity Recognition) 모델로 데이터 내 속성별 빈도 추출 → 속성별 구성비 산출 → Entropy = -Σ p_i × log(p_i). 정규화 Entropy = Entropy / log(속성 수).",
+    "pass_rule": "Entropy ≥ 0.8",
+    "pass_rule_source": "manual_method_example",
+    "pass_rule_table_ref": "P320 (방법 설명 예시: 'Entropy가 0.8이상인지 여부 확인')",
+    "input_data_schema": {
+      "required": ["텍스트 데이터셋", "보호변수 속성 목록 (예: 성별 관련 키워드)"],
+      "output": "속성별 구성비 dict"
+    },
+    "github_pages_feasibility": "직접 산출 가능",
+    "github_pages_feasibility_detail": "속성별 구성비가 사전 계산되어 있으면 Entropy 계산은 JavaScript로 가능. NER 추출은 Python 사전 처리 필요.",
+    "implementation_strategy": "Notebook에서 NER 기반 속성 구성비 추출 → JSON 저장 → 정적 페이지에서 Entropy 계산 및 시각화. 인터랙티브 구성비 입력 가능.",
+    "current_repo_status": "부분구현",
+    "redesign_notes": "긴급: 현재 통과기준 0.7 → 0.8로 수정 (P320 근거). 단, 이 기준도 manual_method_example임을 UI에 명시. 정규화 방식 동일 유지."
+  },
+  {
+    "section_id": "LLM-D-02",
+    "category": "생성형",
+    "metric_name": "형식 편향",
+    "manual_description": "검증데이터에서 특정 장르, 스타일, 길이(형식)가 도드라지는지 여부. 가능한 형식 풀을 정의한 뒤 분포의 균등성 측정.",
+    "metric_formula_or_method": "형식 풀 정의(예: JSON, DIALOG, TABLE, PLAIN_TEXT 등) → 규칙 기반 정규표현식으로 형식 분류 → 형식별 구성비 산출 → Entropy 계산.",
+    "pass_rule": "Entropy ≥ 0.8",
+    "pass_rule_source": "manual_method_example",
+    "pass_rule_table_ref": "P339 (예시: 'Entropy = 0.729 < 0.8이므로 형식 편향 존재')",
+    "input_data_schema": {
+      "required": ["텍스트 데이터셋", "형식 판별 규칙(정규식 등)"],
+      "format_examples": ["JSON", "DIALOG", "TABLE", "MARKDOWN", "PLAIN_TEXT"]
+    },
+    "github_pages_feasibility": "직접 산출 가능",
+    "github_pages_feasibility_detail": "형식 구성비가 사전 계산되면 Entropy는 JavaScript 계산 가능.",
+    "implementation_strategy": "Notebook에서 형식 분류 코드 작성 → 형식별 구성비 JSON → 정적 페이지 시각화. 대표성 편향과 동일 Entropy 계산 컴포넌트 재사용.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "대표성 편향(LLM-D-01)과 지표 동일, 검증 대상 상이(속성 분포 vs 형식 분포). 별도 노트북 또는 대표성 편향 노트북 내 섹션으로 추가 가능."
+  },
+  {
+    "section_id": "LLM-D-03",
+    "category": "생성형",
+    "metric_name": "선호도 편향",
+    "manual_description": "학습/검증/1차·2차시험 데이터에 특정 경향이나 선호(예: 긍정적 어조, 특정 스타일)가 과도하게 반영되는지 여부. 텍스트 임베딩 클러스터링으로 선호도 분포 측정.",
+    "metric_formula_or_method": "Sentence-BERT 등으로 텍스트 임베딩 → k-means 클러스터링(k 설정 필요) → 클러스터별 구성비(실제분포 P) 계산 → 이상적 균등분포(Q = 1/k) 대비 KL Divergence 계산: KL(P||Q) = Σ P(x) × log(P(x)/Q(x)).",
+    "pass_rule": "KL Divergence < 0.2",
+    "pass_rule_source": "manual_table",
+    "pass_rule_table_ref": "표 2.3.6",
+    "input_data_schema": {
+      "required": ["텍스트 데이터셋", "클러스터 수(k) 설정"],
+      "output": "클러스터별 구성비 dict, KL Divergence 값"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "Sentence-BERT 임베딩과 k-means는 Python 환경 필요. KL Divergence 계산은 구성비가 준비되면 JavaScript 가능.",
+    "implementation_strategy": "Notebook에서 임베딩 → 클러스터링 → 구성비 계산 → JSON 저장 → 정적 페이지에서 KL Divergence 재계산 및 시각화.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 가장 명확한 생성형 항목. sentence-transformers 라이브러리로 구현 가능. k값(클러스터 수)은 도메인 맥락에 따라 설정 필요."
+  },
+  {
+    "section_id": "LLM-M-01",
+    "category": "생성형",
+    "metric_name": "사실성",
+    "manual_description": "모델 출력 결과가 객관적 사실적 근거와 일치하는지 여부. 정답이 명확히 존재하는 과제에 적합.",
+    "metric_formula_or_method": "벤치마크 테스트: TruthfulQA 데이터셋 활용. 모델 출력 결과를 정답 레이블과 비교하여 Truthfulness % (정답 비율) 계산.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["TruthfulQA 데이터셋 또는 동등 벤치마크", "모델 출력 결과"],
+      "output": "Truthfulness % (0~100)"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "모델 추론 환경 필요. 사전 계산된 Truthfulness % JSON → 정적 페이지 시각화.",
+    "implementation_strategy": "Notebook에서 TruthfulQA 로드 → 모델 추론 → Truthfulness 계산 → JSON 저장 → 결과 페이지 표시.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 설정 필요. 현재 미명시 → '협의 필요' 표기. 환각(LLM-S-06)과 연관성 있음."
+  },
+  {
+    "section_id": "LLM-M-02",
+    "category": "생성형",
+    "metric_name": "정확성",
+    "manual_description": "정답이 존재하는 경우에 한정해 모델 출력 결과가 정답과 일치하는지 여부.",
+    "metric_formula_or_method": "벤치마크 테스트: MMLU(Massive Multitask Language Understanding) 활용. ACC = 정답 수 / 전체 문항 수.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["MMLU 데이터셋 또는 동등 벤치마크", "모델 출력 결과"],
+      "output": "Accuracy % (0~100)"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "모델 추론 환경 필요. 결과 JSON → 정적 페이지 시각화.",
+    "implementation_strategy": "Notebook에서 MMLU 서브셋 로드 → 모델 추론 → ACC 계산 → JSON → 결과 표시.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 설정 필요 → '협의 필요'. 사실성(LLM-M-01)과 함께 벤치마크 기반 노트북으로 구현 권고."
+  },
+  {
+    "section_id": "LLM-M-03",
+    "category": "생성형",
+    "metric_name": "유창성",
+    "manual_description": "문장이 언어적으로 자연스럽고 문법적으로 올바른지 여부.",
+    "metric_formula_or_method": "LLM-as-a-Judge (G-Eval) 방식: 평가자 LLM에 유창성 평가 프롬프트 입력 → Likert 1~5점 척도로 출력. 문서 예시 프롬프트: '문법적 유창성을 평가하는 심판자로서 1~5점으로 평가'.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["평가 대상 생성 텍스트", "평가자 LLM (Judge LLM)", "평가 프롬프트"],
+      "output": "Likert 1~5점 점수 및 평가 근거"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "LLM API 호출 필요. 사전 평가 결과 JSON → 정적 페이지 시각화.",
+    "implementation_strategy": "Notebook에서 G-Eval 방식으로 Judge LLM 호출 → Likert 점수 수집 → 결과 JSON → 인터랙티브 시각화.",
+    "current_repo_status": "부분구현",
+    "redesign_notes": "긴급: 현재 Perplexity 혼용 및 임의 기준(≥3.5, PPL<100) 제거. Likert 척도 기반으로 재구현. 통과기준 '협의 필요'로 명시."
+  },
+  {
+    "section_id": "LLM-M-04",
+    "category": "생성형",
+    "metric_name": "관련성",
+    "manual_description": "질문과 답변 간 관련 여부.",
+    "metric_formula_or_method": "LLM-as-a-Judge (G-Eval) 방식. 평가자 LLM에 관련성 평가 프롬프트 입력 → Likert 1~5점 척도.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["입력 프롬프트(질문)", "모델 출력(답변)", "평가자 LLM"],
+      "output": "Likert 1~5점"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "LLM Judge 필요.",
+    "implementation_strategy": "유창성·관련성·일관성·완전성·간결성을 하나의 LLM-as-a-Judge 노트북으로 통합 구현 권고.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'."
+  },
+  {
+    "section_id": "LLM-M-05",
+    "category": "생성형",
+    "metric_name": "일관성",
+    "manual_description": "출력 내 문장·단어의 논리적·맥락적 연결 여부.",
+    "metric_formula_or_method": "LLM-as-a-Judge (G-Eval) 방식. Likert 1~5점 척도.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["모델 출력 텍스트", "평가자 LLM"],
+      "output": "Likert 1~5점"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "LLM Judge 필요.",
+    "implementation_strategy": "LLM-as-a-Judge 통합 노트북으로 구현.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'."
+  },
+  {
+    "section_id": "LLM-M-06",
+    "category": "생성형",
+    "metric_name": "완전성",
+    "manual_description": "요구된 정보나 답변 구성 요소가 모두 포함되었는지 여부.",
+    "metric_formula_or_method": "LLM-as-a-Judge (G-Eval) 방식. Likert 1~5점 척도. 또는 벤치마크 테스트 병행 가능.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["입력 요청(프롬프트)", "모델 출력", "평가자 LLM"],
+      "output": "Likert 1~5점"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "LLM Judge 필요.",
+    "implementation_strategy": "LLM-as-a-Judge 통합 노트북으로 구현.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'."
+  },
+  {
+    "section_id": "LLM-M-07",
+    "category": "생성형",
+    "metric_name": "다양성",
+    "manual_description": "모델 출력에서 사용되는 어휘의 다양성 여부. 반복 없이 풍부한 표현 사용.",
+    "metric_formula_or_method": "Distinct-n: 고유 n-gram 수 / 전체 n-gram 수. Distinct-1 (유니그램), Distinct-2 (바이그램). 벤치마크 데이터셋: CommonGen.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["모델 출력 텍스트 집합"],
+      "output": "Distinct-1, Distinct-2 값 (0~1)"
+    },
+    "github_pages_feasibility": "직접 산출 가능",
+    "github_pages_feasibility_detail": "n-gram 계산은 JavaScript로 직접 가능. 텍스트 입력 또는 사전 계산 결과 모두 가능.",
+    "implementation_strategy": "Notebook에서 다양한 프롬프트에 대한 모델 출력 수집 → Distinct-n 계산 → JSON → 정적 페이지 또는 인터랙티브 입력 계산기.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'. Distinct-n은 자체 계산 가능한 유일한 LLM 성능 지표."
+  },
+  {
+    "section_id": "LLM-M-08",
+    "category": "생성형",
+    "metric_name": "간결성",
+    "manual_description": "모델 출력이 장황하지 않고 핵심적으로 요약되는지 여부.",
+    "metric_formula_or_method": "LLM-as-a-Judge (G-Eval) 방식. Likert 1~5점 척도.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["모델 출력 텍스트", "평가자 LLM"],
+      "output": "Likert 1~5점"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "LLM Judge 필요.",
+    "implementation_strategy": "LLM-as-a-Judge 통합 노트북으로 구현.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'."
+  },
+  {
+    "section_id": "LLM-S-01",
+    "category": "생성형",
+    "metric_name": "편향성",
+    "manual_description": "인종, 성별, 나이 등에 따라 차별적인 대답을 하는지 여부. 모델이 왜곡된 출력을 생성하는 현상.",
+    "metric_formula_or_method": "벤치마크 테스트: Crows-Pairs 데이터셋 활용. Bias Score = 스테레오타입 문장을 선호하는 비율.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["Crows-Pairs 데이터셋 또는 동등 벤치마크", "모델 출력"],
+      "output": "Bias Score (0~100%, 낮을수록 편향 적음)"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "모델 추론 환경 필요.",
+    "implementation_strategy": "Notebook에서 Crows-Pairs 로드 → 모델 추론 → Bias Score 계산 → JSON → 결과 시각화.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'. 유해성(LLM-S-02)와 함께 안전성 섹션으로 묶어 구현 권고."
+  },
+  {
+    "section_id": "LLM-S-02",
+    "category": "생성형",
+    "metric_name": "유해성",
+    "manual_description": "혐오, 욕설 등 폭력적 내용의 여부. 모델이 폭력적·혐오적 발언 등 유해한 출력을 생성하는 현상.",
+    "metric_formula_or_method": "벤치마크 테스트: RealToxicityPrompts 데이터셋 활용. Toxicity Score = 유해성 분류기(예: Perspective API, Detoxify) 출력값.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["RealToxicityPrompts 데이터셋 또는 동등 프롬프트", "모델 생성 텍스트"],
+      "output": "Toxicity Score (0~1, 낮을수록 안전)"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "Detoxify 등 모델 추론 필요. 결과 JSON → 정적 페이지 시각화.",
+    "implementation_strategy": "기존 NB06 기반으로 RealToxicityPrompts 적용. 통과기준 표기를 '협의 필요'로 수정.",
+    "current_repo_status": "부분구현",
+    "redesign_notes": "현재 Toxicity < 0.2 기준은 문서 근거 없음 → '협의 필요'로 수정. Detoxify 활용은 유지 가능. RealToxicityPrompts 데이터셋 명시 추가."
+  },
+  {
+    "section_id": "LLM-S-03",
+    "category": "생성형",
+    "metric_name": "견고성",
+    "manual_description": "노이즈, 적대적 공격, 불완전한 데이터에도 안정적인 성능을 유지하는지 여부.",
+    "metric_formula_or_method": "레드팀(Red Team) 수행: AdvGLUE 데이터셋 활용. ASR (Attack Success Rate) = 공격 성공 횟수 / 전체 공격 시도 수.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["AdvGLUE 데이터셋 또는 자체 설계 적대적 입력", "모델 원래 출력", "공격 후 출력"],
+      "output": "ASR (0~1, 낮을수록 견고)"
+    },
+    "github_pages_feasibility": "외부 평가기 필요",
+    "github_pages_feasibility_detail": "Red Team 수동 공격 수행 필요. 정적 페이지에서 직접 산출 불가. 개념 설명 + 사전 계산 결과 표시만 가능.",
+    "implementation_strategy": "개념 설명 페이지 제공. 사전 수행한 Red Team 결과를 JSON으로 저장 후 표시. 또는 '준비 중' 상태로 표기.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'. ASR 계열 3개 항목(견고성·개인정보·Jailbreak) 함께 Red Team 섹션으로 묶어 구현 권고."
+  },
+  {
+    "section_id": "LLM-S-04",
+    "category": "생성형",
+    "metric_name": "개인정보보호",
+    "manual_description": "개인정보를 보호하고 중요한 데이터의 유출이 없는지 여부. 모델이 학습데이터나 대화에서 개인식별정보(PII)를 노출하는 현상.",
+    "metric_formula_or_method": "레드팀 수행: PANORAMA 데이터셋 활용. ASR = 개인정보 추출 공격 성공률.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["PANORAMA 데이터셋 또는 자체 PII 유출 공격 프롬프트"],
+      "output": "ASR (0~1)"
+    },
+    "github_pages_feasibility": "외부 평가기 필요",
+    "github_pages_feasibility_detail": "Red Team 수동 수행 필요.",
+    "implementation_strategy": "개념 설명 페이지. 사전 Red Team 결과 표시.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'."
+  },
+  {
+    "section_id": "LLM-S-05",
+    "category": "생성형",
+    "metric_name": "안전장치 우회",
+    "manual_description": "사용자가 공격 기법을 통해 모델에 내장된 안전 필터 및 정책을 무력화시키는 행위(Jailbreak)에 모델이 취약한지 여부.",
+    "metric_formula_or_method": "레드팀 수행: DAN Prompts 활용. 공격 전략: 완곡한 표현, 아첨, 역할극, 질문 쪼개기, 언어 변환 등. ASR = 안전장치 우회 성공률.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["DAN 공격 프롬프트 데이터셋", "모델 응답"],
+      "output": "ASR (0~1)"
+    },
+    "github_pages_feasibility": "외부 평가기 필요",
+    "github_pages_feasibility_detail": "Red Team 수동 수행 필요. 개념 설명 + 공격 전략 카탈로그는 정적 페이지로 제공 가능.",
+    "implementation_strategy": "문서 [표 2.3.13] 공격 전략 카탈로그를 정적 페이지로 제공. 실제 ASR 계산 결과는 사전 Red Team 수행 후 업로드.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'. 안전성 교육 목적으로 공격 유형 설명 페이지 구현 가치 있음."
+  },
+  {
+    "section_id": "LLM-S-06",
+    "category": "생성형",
+    "metric_name": "환각",
+    "manual_description": "모델이 사실과 다른 정보를 생성하는지 여부. 존재하지 않는 사실을 생성하는 현상.",
+    "metric_formula_or_method": "벤치마크 테스트: FEVER 데이터셋 활용. FEVER Score = 사실 검증 정확도 (SUPPORTED/REFUTED/NEI 분류).",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["FEVER 데이터셋 또는 동등 사실 검증 데이터셋", "모델 출력"],
+      "output": "FEVER Score (0~1)"
+    },
+    "github_pages_feasibility": "사전 계산 결과 업로드 필요",
+    "github_pages_feasibility_detail": "모델 추론 환경 필요. 결과 JSON → 정적 페이지.",
+    "implementation_strategy": "Notebook에서 FEVER 서브셋 로드 → 모델 추론 → 사실 검증 → Score 계산 → JSON → 결과 표시.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'. 사실성(LLM-M-01)과 함께 '신뢰성 평가' 섹션으로 묶어 구현 권고."
+  },
+  {
+    "section_id": "LLM-X-01",
+    "category": "생성형",
+    "metric_name": "설명가능성",
+    "manual_description": "AI 모델 예측/판단 결과가 사람에게 이해 가능한 방식으로 설명될 수 있는 능력. 생성형은 Mechanistic Interpretability 적용: 출력에 기여한 뉴런·가중치·회로 규명.",
+    "metric_formula_or_method": "MLP 활성값 대규모 Corpus 샘플링 → L1 정규화로 Transcoder/SAE 학습 → 기존 모델 손실 vs 트랜스코더 교체 모델 손실 차이 정량화 → gradient 기반 회로 탐색 → activation/path patching으로 인과적 기여 검증.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["LLM 모델 가중치 접근권한", "대규모 Corpus 데이터셋"],
+      "output": "feature 기여도 시각화, 회로 다이어그램"
+    },
+    "github_pages_feasibility": "외부 평가기 필요",
+    "github_pages_feasibility_detail": "고성능 GPU 환경 및 SAE 학습 필요. 정적 페이지에서 직접 산출 불가.",
+    "implementation_strategy": "개념 설명 페이지 + 문서 내 시각화 예시 이미지 제공. 실제 구현은 '외부 평가 환경 필요' 안내.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'. 일반 GitHub Pages에서 구현 난이도 매우 높음. 개념 소개 + 예시 시각화로 대체 권고."
+  },
+  {
+    "section_id": "AGT-01",
+    "category": "생성형",
+    "metric_name": "Agentic Task",
+    "manual_description": "에이전트가 주어진 시나리오를 성공적으로 수행하는 능력. 성능/안전성/툴 호출 정확성 평가.",
+    "metric_formula_or_method": "1) 최종 출력 기반 성능·안전성 평가 2) 목표 달성 과정에서 적합한 도구 호출 여부 평가. OpenAgentSafety, AgentHarm, MCPEval 등 프레임워크 활용. Success Rate = 성공 시나리오 수 / 전체 시나리오 수.",
+    "pass_rule": null,
+    "pass_rule_source": null,
+    "pass_rule_table_ref": "해당 없음 (통과기준 미명시)",
+    "input_data_schema": {
+      "required": ["평가 대상 에이전트", "시나리오 데이터셋 (태스크/도메인)", "평가 방식 설정 (rule/llm/human)"],
+      "output": "Success Rate (0~1), 도구 호출 정확도"
+    },
+    "github_pages_feasibility": "외부 평가기 필요",
+    "github_pages_feasibility_detail": "에이전트 실행 환경, Judge LLM 별도 구축 필요.",
+    "implementation_strategy": "개념 설명 페이지. 문서 내 OpenAgentSafety 코드 예시 안내. 실제 평가는 별도 환경 필요 안내.",
+    "current_repo_status": "미구현",
+    "redesign_notes": "통과기준 미명시 → '협의 필요'. 다른 항목 구현 후 마지막 단계로 추진 권고."
+  }
+]

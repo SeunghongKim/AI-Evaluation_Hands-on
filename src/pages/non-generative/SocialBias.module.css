@@ -1,0 +1,131 @@
+.inputSection {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.configRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.configItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.configLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.configInput {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  background: var(--color-neutral-50);
+}
+
+.exampleRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.exBtn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.exBtn:hover {
+  background: var(--color-neutral-100);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.inputTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.inputField {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  background: var(--color-neutral-50);
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.addBtn {
+  margin-top: 10px;
+  padding: 7px 16px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-neutral-500);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.resultsSection {
+  margin-top: 4px;
+}
+
+.totalResult {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.totalLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+}
+
+.totalValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-neutral-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.totalThreshold {
+  font-size: 0.82rem;
+  color: var(--color-neutral-500);
+  margin-left: auto;
+}

@@ -1,0 +1,131 @@
+.uploadSection {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-neutral-700);
+  margin-bottom: 12px;
+}
+
+.desc {
+  font-size: 0.88rem;
+  color: var(--color-neutral-600);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.conceptList {
+  list-style: disc;
+  padding-left: 20px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+  color: var(--color-neutral-700);
+  line-height: 1.8;
+}
+
+.uploadArea {
+  margin-top: 16px;
+}
+
+.fileLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.fileInput {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.chartSection {
+  margin-top: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.chartTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-neutral-700);
+  margin-bottom: 14px;
+}
+
+.barRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.barLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  min-width: 120px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.barTrack {
+  flex: 1;
+  height: 22px;
+  background: var(--color-neutral-100);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width 0.3s ease;
+}
+
+.barFillPos {
+  background: #2d7dd2;
+}
+
+.barFillNeg {
+  background: #ef4444;
+}
+
+.barValue {
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  color: var(--color-neutral-600);
+  min-width: 60px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-neutral-400);
+  font-size: 0.88rem;
+}
+
+.emptyIcon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.errorMsg {
+  padding: 10px 14px;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  color: #b91c1c;
+  font-size: 0.85rem;
+  margin-top: 10px;
+}

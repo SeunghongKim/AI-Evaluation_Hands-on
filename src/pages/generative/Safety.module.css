@@ -1,0 +1,273 @@
+.tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  background: var(--color-neutral-100);
+  padding: 4px;
+  border-radius: var(--radius-md);
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  min-width: 70px;
+}
+
+.tab:hover {
+  background: var(--color-neutral-200);
+}
+
+.tabActive {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.tabId {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--color-neutral-500);
+  margin-bottom: 2px;
+}
+
+.tabName {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+}
+
+.tabActive .tabId {
+  color: var(--color-danger);
+}
+
+.tabActive .tabName {
+  color: var(--color-primary);
+}
+
+.metricPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.metricId {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.metricName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+}
+
+.metricDesc {
+  font-size: 0.88rem;
+  color: var(--color-neutral-700);
+  margin-bottom: 4px;
+}
+
+.metricNote {
+  font-size: 0.82rem;
+  color: var(--color-neutral-500);
+  margin-bottom: 16px;
+  background: var(--color-neutral-100);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.thresholdRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.thresholdLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+}
+
+.thresholdInput {
+  width: 120px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  text-align: center;
+  background: var(--color-neutral-50);
+}
+
+.thresholdNote {
+  font-size: 0.78rem;
+  color: var(--color-neutral-500);
+}
+
+.asrSection {
+  margin-top: 8px;
+}
+
+.asrHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.asrTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-neutral-700);
+}
+
+.addBtn {
+  padding: 6px 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-neutral-500);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  background: var(--color-neutral-100);
+}
+
+.casesTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+}
+
+.caseInput {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  background: var(--color-neutral-50);
+}
+
+.successBtn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.successBtnOn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.successBtnOff {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 6px;
+}
+
+.removeBtn:hover {
+  color: var(--color-danger);
+}
+
+.asrResult {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 14px;
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.asrStat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.asrStatLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+}
+
+.asrStatValue {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.uploadSection {
+  margin-top: 8px;
+}
+
+.uploadLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.uploadRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.uploadInput {
+  width: 140px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  background: var(--color-neutral-50);
+}
+
+.uploadNote {
+  font-size: 0.78rem;
+  color: var(--color-neutral-500);
+}

@@ -1,0 +1,114 @@
+.chart {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+}
+
+.title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  margin-bottom: 14px;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 160px 1fr 80px;
+  align-items: center;
+  gap: 10px;
+}
+
+.barLabel {
+  font-size: 0.82rem;
+  color: var(--color-neutral-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barTrack {
+  position: relative;
+  height: 22px;
+  background: var(--color-neutral-100);
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.barGood {
+  background: var(--color-success) !important;
+}
+
+.barBad {
+  background: var(--color-danger) !important;
+}
+
+.barNeutral {
+  background: var(--color-accent);
+}
+
+.thresholdLine {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--color-warning);
+  border-radius: 1px;
+  z-index: 2;
+  cursor: help;
+}
+
+.thresholdLine::after {
+  content: attr(title);
+  position: absolute;
+  left: 6px;
+  top: -20px;
+  font-size: 0.7rem;
+  background: var(--color-warning);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  display: none;
+}
+
+.thresholdLine:hover::after {
+  display: block;
+}
+
+.barValue {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.legend {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--color-neutral-500);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.thresholdLegend {
+  color: var(--color-warning);
+  font-weight: 700;
+}
